@@ -7,7 +7,13 @@ import { ConfigModule } from '@nestjs/config';
 import { GithubStrategy } from './auth/github.strategy';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, UsersModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    AuthModule,
+    UsersModule,
+  ],
   controllers: [AppController],
   providers: [AppService, GithubStrategy],
 })

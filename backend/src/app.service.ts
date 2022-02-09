@@ -6,7 +6,7 @@ export class AppService {
     return 'Hello World!';
   }
 
-  async githubLogin(req) {
+  githubLogin(req) {
     if (!req.user) {
       return 'No user from github';
     }

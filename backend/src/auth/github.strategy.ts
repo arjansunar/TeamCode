@@ -1,5 +1,5 @@
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-github2';
+import { Strategy } from 'passport-github2';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -16,7 +16,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     accessToken: string,
     refreshToken: string,
     profile: any,
-    done: VerifyCallback,
   ): Promise<any> {
     const { id, username, profileUrl, emails, photos } = profile;
     const user = {
@@ -25,9 +24,9 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       profileUrl,
       email: emails[0].value,
       photo: photos[0].value,
-      accessToken,
     };
-    // console.log('user', user);
-    done(null, user);
+    console.log('user', user);
+    // save user
+    return user;
   }
 }
