@@ -8,10 +8,13 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports: [
     UsersModule,
-    JwtModule.register({
-      secret: 'secret', //todo put in env but doesnt work
-      // secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '60s' },
+    JwtModule.registerAsync({
+      useFactory: async () => ({
+        secret: process.env.JWT_SECRET,
+        signOptions: {
+          expiresIn: parseInt(process.env.JWT_EXPIRATION_TIME),
+        },
+      }),
     }),
   ],
   providers: [AuthService, GithubStrategy, JwtStrategy],

@@ -25,7 +25,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       email: emails[0].value,
       photo: photos[0].value,
     };
-    console.log('user', user);
+    // console.log('user', user);
     // save user
     return user;
   }
