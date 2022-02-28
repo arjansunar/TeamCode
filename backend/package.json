@@ -28,6 +28,8 @@
     "@nestjs/passport": "^8.1.0",
     "@nestjs/platform-express": "^8.0.0",
     "@prisma/client": "^3.10.0",
+    "@types/bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.0",
     "passport": "^0.5.2",
     "passport-github2": "^0.1.12",

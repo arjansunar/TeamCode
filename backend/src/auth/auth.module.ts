@@ -4,9 +4,12 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { GithubStrategy } from './github.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { AuthController } from './auth.controller';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
   imports: [
+    PrismaModule,
     UsersModule,
     JwtModule.registerAsync({
       useFactory: async () => ({
@@ -19,5 +22,6 @@ import { JwtStrategy } from './jwt.strategy';
   ],
   providers: [AuthService, GithubStrategy, JwtStrategy],
   exports: [AuthService],
+  controllers: [AuthController],
 })
 export class AuthModule {}
