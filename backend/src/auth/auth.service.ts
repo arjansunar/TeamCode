@@ -8,18 +8,18 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // async validateUser(id: string, email: string): Promise<User | null> {
-  //   const user = await this.usersService.findOne(id);
-  //   if (user && user.email === email) {
-  //     const { ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
   async login(user: User) {
     const payload = { username: user.username, sub: user.id };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.JWT_RT_SECRET,
+        expiresIn: 60 * 60 * 24,
+      }),
+    ]);
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
     };
   }
 }
