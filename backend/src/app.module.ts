@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { GithubStrategy } from './auth/github.strategy';
 import { JwtStrategy } from './auth/jwt.strategy';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
     }),
     AuthModule,
     UsersModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService, GithubStrategy, JwtStrategy],
