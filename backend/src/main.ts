@@ -13,6 +13,24 @@ async function bootstrap() {
     .setTitle('TeamCode Api')
     .setDescription('The TeamCode API')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        description: 'access token',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'JWT',
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        description: 'refresh token',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'JWT-RT',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

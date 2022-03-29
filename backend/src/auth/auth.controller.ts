@@ -1,11 +1,11 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { UserLoginDTO } from './dto/user-login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-rt.guard';
+import { UserLoggedGuard } from './guards/user-loggin.guard';
 
 @Controller('auth')
 @ApiTags('Authentication route')
@@ -30,15 +30,16 @@ export class AuthController {
   @Get('/refresh')
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
+  @ApiBearerAuth('JWT-RT')
   async refresh(@Req() req) {
     const { id, username } = req.user;
     const user: UserLoginDTO = {
       id: +id,
       username,
     };
-    const refreshToken = req.user.refreshToken;
+    const refresh_token = req.user.refresh_token;
     const tokens = await this.authService.getAccessFromRefreshToken(
-      refreshToken,
+      refresh_token,
       user,
     );
     return {
@@ -50,7 +51,8 @@ export class AuthController {
 
   // logout route changes the user refresh token
   @Get('/logout')
-  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @UseGuards(UserLoggedGuard)
   async logout(@Req() req) {
     return await this.authService.logout(+req.user.id);
   }

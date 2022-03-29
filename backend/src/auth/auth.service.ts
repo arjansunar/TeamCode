@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma';
 import { UserCreateDTO } from 'src/users/dto';
 import { UsersService } from 'src/users';
-import { UserLoginDTO } from './dto';
+import { Tokens, UserLoginDTO } from './dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -18,7 +18,7 @@ export class AuthService {
   }
 
   async logout(id: number) {
-    const user = this.prisma.user.updateMany({
+    const user = await this.prisma.user.updateMany({
       where: {
         id,
         hashedRt: {
@@ -32,10 +32,12 @@ export class AuthService {
     return user[0];
   }
 
+  /* 
+    first 72 chars of jwt tokens are same
+    bycrypt only encrypts first 72 chars  
+    */
   getUniqueTokenString(jwtToken: string) {
     const stringLen = jwtToken.length;
-    // first 72 chars of jwt tokens are same
-    // bycrypt only encrypts first 72 chars
     return jwtToken.slice(stringLen - 72, stringLen);
   }
 
@@ -52,6 +54,7 @@ export class AuthService {
     }
 
     const user = { ...req.user };
+    const tokens: Tokens = { ...user?.tokens };
     // finding the user with the id
     const dbUser = await this.userService.findUserWithId(+user.id);
 
@@ -61,16 +64,15 @@ export class AuthService {
         id: parseInt(user?.id),
         email: user?.email,
         photo: user?.photo,
-        profileUrl: user?.profileUrl,
         username: user?.username,
         hashedRt: await this.hashData(
-          this.getUniqueTokenString(user?.tokens?.refreshToken),
+          this.getUniqueTokenString(tokens.refresh_token),
         ),
       };
       await this.userService.createUser(newUser);
     } else {
       // updating user hash
-      await this.updateUserHashRt(user.tokens.refreshToken, +user.id);
+      await this.updateUserHashRt(tokens.refresh_token, +user.id);
 
       return {
         message: 'User from db',
@@ -86,7 +88,7 @@ export class AuthService {
   async login(user: UserLoginDTO): Promise<Tokens> {
     const payload = { username: user.username, sub: user.id };
     const tokenDate = new Date();
-    const [accessToken, refreshToken] = await Promise.all([
+    const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(
         { ...payload, tokenDate },
@@ -97,8 +99,8 @@ export class AuthService {
       ),
     ]);
     return {
-      accessToken,
-      refreshToken,
+      access_token,
+      refresh_token,
     };
   }
 
@@ -119,7 +121,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token mismatch');
     }
     const newTokens = await this.login(user);
-    await this.updateUserHashRt(newTokens.refreshToken, user.id);
+    await this.updateUserHashRt(newTokens.refresh_token, user.id);
     return newTokens;
   }
 
@@ -128,8 +130,3 @@ export class AuthService {
     return await bcrypt.compare(uniqueTokenString, hashToken);
   }
 }
-
-export type Tokens = {
-  accessToken: string;
-  refreshToken: string;
-};
