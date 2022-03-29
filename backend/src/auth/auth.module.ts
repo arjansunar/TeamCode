@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { UsersModule } from 'src/users/users.module';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { GithubStrategy } from './github.strategy';
-import { JwtStrategy } from './jwt.strategy';
+import { GithubStrategy } from './strategy/github.strategy';
+import { JwtStrategy } from './strategy';
 import { AuthController } from './auth.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { JwtRtStrategy } from './jwt-rt.strategy';
+import { JwtRtStrategy } from './strategy';
 
 @Module({
   imports: [

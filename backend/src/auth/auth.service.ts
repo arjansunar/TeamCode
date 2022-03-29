@@ -1,10 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma';
+import { UserCreateDTO } from 'src/users/dto';
+import { UsersService } from 'src/users';
+import { UserLoginDTO } from './dto';
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, private prisma: PrismaService) {}
+  constructor(
+    private jwtService: JwtService,
+    private prisma: PrismaService,
+    private userService: UsersService,
+  ) {}
 
   async hashData(data: string) {
     return await bcrypt.hash(data, 10);
@@ -36,14 +43,7 @@ export class AuthService {
     const uniqueTokenString = this.getUniqueTokenString(refreshToken);
     const hash = await this.hashData(uniqueTokenString);
 
-    return this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        hashedRt: hash,
-      },
-    });
+    return await this.userService.updateUserHashRt(id, hash);
   }
 
   async githubLogin(req) {
@@ -53,32 +53,24 @@ export class AuthService {
 
     const user = { ...req.user };
     // finding the user with the id
-    const dbUser = await this.prisma.user.findUnique({
-      where: {
-        id: parseInt(user.id),
-      },
-    });
+    const dbUser = await this.userService.findUserWithId(+user.id);
 
     if (!dbUser) {
       // saving user
-      const newUser = await this.prisma.user.create({
-        data: {
-          id: parseInt(user.id),
-          email: user.email,
-          photo: user.photo,
-          profileUrl: user.profileUrl,
-          username: user.username,
-          // hashedRt: user.tokens.refreshToken,
-          hashedRt: await this.hashData(
-            this.getUniqueTokenString(user.tokens.refreshToken),
-          ),
-        },
-      });
+      const newUser: UserCreateDTO = {
+        id: parseInt(user?.id),
+        email: user?.email,
+        photo: user?.photo,
+        profileUrl: user?.profileUrl,
+        username: user?.username,
+        hashedRt: await this.hashData(
+          this.getUniqueTokenString(user?.tokens?.refreshToken),
+        ),
+      };
+      await this.userService.createUser(newUser);
     } else {
-      const updateUser = await this.updateUserHashRt(
-        user.tokens.refreshToken,
-        +user.id,
-      );
+      // updating user hash
+      await this.updateUserHashRt(user.tokens.refreshToken, +user.id);
 
       return {
         message: 'User from db',
@@ -91,7 +83,7 @@ export class AuthService {
     };
   }
 
-  async login(user: LoginUserDTO): Promise<Tokens> {
+  async login(user: UserLoginDTO): Promise<Tokens> {
     const payload = { username: user.username, sub: user.id };
     const tokenDate = new Date();
     const [accessToken, refreshToken] = await Promise.all([
@@ -110,30 +102,24 @@ export class AuthService {
     };
   }
 
-  async getAccessFromRefreshToken(refreshToken: string, user: LoginUserDTO) {
-    const dbUser = await this.prisma.user.findUnique({
-      where: {
-        id: user.id,
-      },
-    });
+  async getAccessFromRefreshToken(refreshToken: string, user: UserLoginDTO) {
+    const dbUser = await this.userService.findUserWithId(user.id);
 
     if (!dbUser.hashedRt || !dbUser) {
       throw new UnauthorizedException('User logged out');
     }
 
+    // validating user refresh token and db hash
     const isUser = await this.compareHashAndTokens(
       refreshToken,
       dbUser.hashedRt,
     );
-    // const isUser = refreshToken == dbUser.hashedRt;
+
     if (!isUser) {
       throw new UnauthorizedException('Refresh token mismatch');
     }
     const newTokens = await this.login(user);
-    const updatedUser = await this.updateUserHashRt(
-      newTokens.refreshToken,
-      user.id,
-    );
+    await this.updateUserHashRt(newTokens.refreshToken, user.id);
     return newTokens;
   }
 
@@ -142,11 +128,6 @@ export class AuthService {
     return await bcrypt.compare(uniqueTokenString, hashToken);
   }
 }
-
-export type LoginUserDTO = {
-  id: number;
-  username: string;
-};
 
 export type Tokens = {
   accessToken: string;

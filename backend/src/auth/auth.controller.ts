@@ -1,11 +1,14 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService, LoginUserDTO } from './auth.service';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
+import { UserLoginDTO } from './dto/user-login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshAuthGuard } from './guards/jwt-rt.guard';
 
 @Controller('auth')
+@ApiTags('Authentication route')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
@@ -29,7 +32,7 @@ export class AuthController {
   @UseGuards(JwtRefreshAuthGuard)
   async refresh(@Req() req) {
     const { id, username } = req.user;
-    const user: LoginUserDTO = {
+    const user: UserLoginDTO = {
       id: +id,
       username,
     };

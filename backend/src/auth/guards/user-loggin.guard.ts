@@ -3,13 +3,12 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  // ForbiddenException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-export class UserLogGuard implements CanActivate {
+export class UserLoggedGuard implements CanActivate {
   constructor(private prisma: PrismaService) {}
 
   canActivate(
