@@ -1,5 +1,5 @@
 import "../styles/globals.css";
-import { LayoutSidebar } from "../src/Layout";
+import { LayoutSidebar } from "../src/layout";
 import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 
