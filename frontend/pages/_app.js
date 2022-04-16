@@ -1,7 +1,21 @@
-import '../styles/globals.css'
+import "../styles/globals.css";
+import { LayoutSidebar } from "../src/Layout";
+import { createGlobalStyle } from "styled-components";
+import reset from "styled-reset";
+
+const GlobalStyleWithReset = createGlobalStyle`
+  ${reset}
+`;
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return (
+    <>
+      <GlobalStyleWithReset />
+      <LayoutSidebar>
+        <Component {...pageProps} />
+      </LayoutSidebar>
+    </>
+  );
 }
 
-export default MyApp
+export default MyApp;
