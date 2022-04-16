@@ -1,5 +1,4 @@
 import ReactAce from "react-ace";
-import brace from "brace";
 
 import "brace/mode/javascript";
 import "brace/theme/monokai";
@@ -22,6 +21,7 @@ const AceEditor = (props: Props) => {
   };
   return (
     <ReactAce
+      name="ACE_EDITOR_REACT"
       mode="javascript"
       theme="monokai"
       onChange={onChange}
