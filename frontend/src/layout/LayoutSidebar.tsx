@@ -4,12 +4,12 @@ import colors from "../theme/colors.json";
 
 import { useRouter } from "next/router";
 import { IconType } from "react-icons";
-import {
-  BsChatLeftTextFill as ChatIcon,
-  // BsFillFileCodeFill as EditorIcon,
-} from "react-icons/bs";
+import { BsChatLeftTextFill as ChatIcon } from "react-icons/bs";
 
 import { AiFillCode as EditorIcon } from "react-icons/ai";
+
+import { IoMdNotifications as NotificationIcon } from "react-icons/io";
+
 type Props = {
   children?: ReactNode;
 };
@@ -21,6 +21,7 @@ export const LayoutSidebar = ({ children }: Props) => {
         <IconsContainer>
           <LinkButton route="/chat" Icon={ChatIcon} />
           <LinkButton route="/editor" Icon={EditorIcon} />
+          <LinkButton route="/notification" Icon={NotificationIcon} />
         </IconsContainer>
       </SidebarContainer>
       {children}
@@ -42,7 +43,7 @@ const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
 
 const SidebarContainer = styled.div`
   height: 100vh;
-  background-color: ${colors["bg-dark"]};
+  background-color: ${colors.theme["dark-400"]};
   padding-top: 2rem;
 `;
 const Layout = styled.div`
@@ -65,7 +66,7 @@ const IconWrapper = styled.button`
   background: none;
   padding: 0;
   border: none;
-  color: ${colors["bg-light"]};
+  color: ${colors.theme["text-light-muted"]};
   font-size: 1.125rem;
   cursor: pointer;
 `;
