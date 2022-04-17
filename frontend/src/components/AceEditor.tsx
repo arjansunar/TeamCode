@@ -10,7 +10,7 @@ type Props = {};
 
 const AceEditor = (props: Props) => {
   const onChange = (newVal, e) => {
-    console.log({ newVal });
+    // console.log({ newVal });
   };
   const onLoad = (editor) => {
     // editor.setOptions({
@@ -25,7 +25,7 @@ const AceEditor = (props: Props) => {
       mode="javascript"
       theme="monokai"
       onChange={onChange}
-      style={{ height: "70vh", width: "100%" }}
+      style={{ height: "100%", width: "100%" }}
       readOnly={false}
       fontSize={18}
       onLoad={onLoad}

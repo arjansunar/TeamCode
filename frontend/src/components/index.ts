@@ -1,1 +1,1 @@
-export * from "./EditorMonacoView";
+export * from "./OutputScreen";
