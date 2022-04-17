@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styled from "styled-components";
 import colors from "../../theme/colors.json";
 
@@ -20,9 +21,17 @@ const users = [
 ];
 
 const ChatUsers = (props: Props) => {
+  const [searchUser, setSearchUser] = useState("");
+  const handleSearchChange = (val) => {
+    setSearchUser(val?.target?.value);
+  };
   return (
     <Container>
-      <SearchBar placeholder="Search User" />
+      <SearchBar
+        placeholder="Search User"
+        value={searchUser}
+        onChange={handleSearchChange}
+      />
       <UsersContainer>
         {!!users ? (
           users?.map((el, i) => (
@@ -46,11 +55,12 @@ const Container = styled.div`
 
 const SearchBar = styled.input`
   background-color: ${colors.theme["dark-800"]};
-  color: ${colors.theme["text-light"]};
+  color: ${colors.theme["text-light-muted"]};
   border: none;
   padding: 0.8rem 1.5rem;
   outline: none;
-  border-radius: 0.3rem;
+  border-radius: 0.5rem;
+  width: 100%;
 `;
 
 const UsersContainer = styled.div`
@@ -65,7 +75,7 @@ const UsersContainer = styled.div`
 const UserImage = styled.img`
   height: 3rem;
   width: 3rem;
-  border-radius: 20% 0 0 20%;
+  border-radius: 0.5rem 0 0 0.5rem;
   object-fit: cover;
   object-position: center center;
 `;
@@ -82,6 +92,6 @@ const UserContainer = styled.div`
   align-items: center;
   background-color: ${colors.theme["dark-300"]};
   padding-right: 1.5rem;
-  border-radius: 0.7rem;
+  border-radius: 0.5rem;
 `;
 export default ChatUsers;

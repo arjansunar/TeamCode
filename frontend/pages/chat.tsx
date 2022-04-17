@@ -18,6 +18,6 @@ export default chat;
 
 const Container = styled.main`
   display: grid;
-  grid-template-columns: 20vw 1fr;
+  grid-template-columns: 30vw 1fr;
   height: 100%;
 `;
