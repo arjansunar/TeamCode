@@ -8,6 +8,10 @@
     "dark-800": "#161819",
     "text-light": "#f6fbfe",
     "text-light-muted": "#c0c2c3",
-    "text-dark": "#272a2d"
+    "text-dark": "#272a2d",
+    "message": {
+      "bg-light-blue": "#2999fd",
+      "bg-gray": "#26292c"
+    }
   }
 }
