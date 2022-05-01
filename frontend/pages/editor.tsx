@@ -1,7 +1,9 @@
+import { AxiosResponse } from "axios";
 import dynamic from "next/dynamic";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useAxios } from "../src/api/hooks";
+import { ExecutionResults } from "../src/api/hooks/types/CodeExecutionRes";
+import { axiosJudge0 } from "../src/api/hooks/useAxios";
 /* components */
 import { OutputScreen } from "../src/components";
 import colors from "../src/theme/colors.json";
@@ -10,19 +12,71 @@ const AceEditor = dynamic(import("../src/components/AceEditor"), {
 });
 type Props = {};
 
+interface SubmissionSchema {
+  language_id: number;
+  source_code: string;
+  stdin: string;
+}
+const jsSubmissionSchema = (code): SubmissionSchema => {
+  return {
+    language_id: 63,
+    source_code: code,
+    stdin: "",
+  };
+};
+const submissionHeaders = {
+  "content-type": "application/json",
+  "Content-Type": "application/json",
+};
+// creates a instance for code execution and returns the token to access the execution data
+const createSubmission = (code: string) => {
+  const encodedCode = Buffer.from(code).toString("base64");
+  console.log({ encodedCode });
+  const jsSubmission = jsSubmissionSchema(encodedCode);
+  return jsSubmission;
+};
+
+const getSubmissionToken = async (
+  code
+): Promise<{ data: { token: string } }> => {
+  const createSubmissionData = createSubmission(code);
+  return await axiosJudge0.post("submissions", createSubmissionData, {
+    headers: submissionHeaders,
+    params: { base64_encoded: "true" },
+  });
+};
+
+const getSubmissionResults = async (
+  token: string
+): Promise<AxiosResponse<ExecutionResults>> => {
+  return await axiosJudge0.get(`submissions/${token}`, {
+    params: { base64_encoded: "false" },
+  });
+};
+
+const useGetSubmission = (token: string) => {};
+
 const editor = (props: Props) => {
-  // const { error, loading, response } = useAxios({
-  //   url: "/about",
-  //   method: "get",
-  // });
-  // console.log({ response });
+  const [code, setCode] = useState<string>("");
+
+  const handleRunButton = async () => {
+    console.log({ code });
+    try {
+      const { data: submission } = await getSubmissionToken(code);
+      const { data: results } = await getSubmissionResults(submission.token);
+
+      console.log({ results });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <Container>
       <SettingsWrapper>
-        <Button>Run </Button>
+        <Button onClick={handleRunButton}>Run </Button>
       </SettingsWrapper>
-      <AceEditor />
+      <AceEditor code={code} setCode={setCode} />
       <OutputScreen />
     </Container>
   );

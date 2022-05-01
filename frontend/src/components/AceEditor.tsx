@@ -6,11 +6,14 @@ import "brace/theme/monokai";
 import "brace/snippets/javascript";
 import "brace/ext/language_tools";
 
-type Props = {};
+type Props = {
+  code: string;
+  setCode: React.Dispatch<React.SetStateAction<string>>;
+};
 
-const AceEditor = (props: Props) => {
+const AceEditor = ({ code, setCode }: Props) => {
   const onChange = (newVal, e) => {
-    // console.log({ newVal });
+    setCode(newVal);
   };
   const onLoad = (editor) => {
     // editor.setOptions({
