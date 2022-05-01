@@ -31,7 +31,7 @@ const submissionHeaders = {
 // creates a instance for code execution and returns the token to access the execution data
 const createSubmission = (code: string) => {
   const encodedCode = Buffer.from(code).toString("base64");
-  console.log({ encodedCode });
+  // console.log({ encodedCode });
   const jsSubmission = jsSubmissionSchema(encodedCode);
   return jsSubmission;
 };
@@ -54,42 +54,51 @@ const getSubmissionResults = async (
   });
 };
 
-const useGetSubmission = (token: string) => {};
-
 const editor = (props: Props) => {
   const [code, setCode] = useState<string>("");
+  const [output, setOutput] = useState<ExecutionResults>(
+    {} as ExecutionResults
+  );
 
   const handleRunButton = async () => {
-    console.log({ code });
     try {
       const { data: submission } = await getSubmissionToken(code);
       const { data: results } = await getSubmissionResults(submission.token);
 
-      console.log({ results });
+      setOutput(results);
     } catch (e) {
       console.log(e);
     }
   };
 
+  const handleShareButton = () => {
+    console.log("share code");
+  };
+
   return (
     <Container>
       <SettingsWrapper>
-        <Button onClick={handleRunButton}>Run </Button>
+        <Button onClick={handleRunButton}>Run</Button>
+        <Button onClick={handleShareButton}>Share</Button>
       </SettingsWrapper>
       <AceEditor code={code} setCode={setCode} />
-      <OutputScreen />
+      <OutputScreen output={output} />
     </Container>
   );
 };
 
 const Container = styled.main`
   display: grid;
-  grid-template-rows: 5vh 65vh 1fr;
+  grid-template-rows: 6vh 64vh 30vh;
+  overflow: hidden;
 `;
 
 const SettingsWrapper = styled.div`
   background-color: ${colors["bg-dark"]};
   height: 100%;
+  display: flex;
+  gap: 1rem;
+  padding-left: 40%;
 `;
 
 const Button = styled.button`

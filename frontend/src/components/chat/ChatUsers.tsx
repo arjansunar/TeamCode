@@ -1,10 +1,51 @@
-import { useState } from "react";
+import { cloneElement, useState } from "react";
 import styled from "styled-components";
 import colors from "../../theme/colors.json";
+
+import { BsSearch as SearchIcon } from "react-icons/bs";
 
 type Props = {};
 
 const users = [
+  {
+    name: "Arjan Sunar",
+    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
+  },
+  {
+    name: "Aaka Sunar",
+    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
+  },
+  {
+    name: "Daaka Sunar",
+    image:
+      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+  },
+  {
+    name: "Arjan Sunar",
+    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
+  },
+  {
+    name: "Aaka Sunar",
+    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
+  },
+  {
+    name: "Daaka Sunar",
+    image:
+      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+  },
+  {
+    name: "Arjan Sunar",
+    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
+  },
+  {
+    name: "Aaka Sunar",
+    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
+  },
+  {
+    name: "Daaka Sunar",
+    image:
+      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+  },
   {
     name: "Arjan Sunar",
     image: "https://avatars.githubusercontent.com/u/55121485?v=4",
@@ -25,17 +66,26 @@ const ChatUsers = (props: Props) => {
   const handleSearchChange = (val) => {
     setSearchUser(val?.target?.value);
   };
+
+  const handleSearchSubmit = () => {
+    console.log({ searchUser });
+  };
   return (
     <Container>
-      <SearchBar
-        placeholder="Search User"
-        value={searchUser}
-        onChange={handleSearchChange}
-      />
+      <SearchWrapper onSubmit={(e) => e.preventDefault()}>
+        <SearchBar
+          placeholder="Search User"
+          value={searchUser}
+          onChange={handleSearchChange}
+        />
+        <SearchButton onClick={handleSearchSubmit}>
+          <SearchIcon />
+        </SearchButton>
+      </SearchWrapper>
       <UsersContainer>
         {!!users ? (
           users?.map((el, i) => (
-            <UserContainer key={i}>
+            <UserContainer key={i + el.name}>
               <UserImage src={el.image} />
               <UserName>{el.name}</UserName>
             </UserContainer>
@@ -51,6 +101,8 @@ const ChatUsers = (props: Props) => {
 const Container = styled.div`
   background-color: ${colors.theme["dark-500"]};
   padding: 1rem 1.5rem;
+  height: 100vh;
+  overflow: hidden;
 `;
 
 const SearchBar = styled.input`
@@ -62,14 +114,35 @@ const SearchBar = styled.input`
   border-radius: 0.5rem;
   width: 100%;
 `;
+const SearchWrapper = styled.form`
+  display: flex;
+  background-color: ${colors.theme["dark-800"]};
+`;
+
+const SearchButton = styled.button`
+  color: ${colors.theme["text-light"]};
+  background-color: ${colors.theme["dark-400"]};
+  padding: 0 0.6rem;
+  outline: none;
+  border: none;
+  display: flex;
+  place-items: center;
+  border-radius: 0 0.5rem 0.5rem 0;
+`;
 
 const UsersContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin: 2rem 0;
   gap: 1rem;
+  overflow-y: scroll;
+  height: 85%;
+  /* width */
+  ::-webkit-scrollbar {
+    width: 0px;
+  }
 `;
 
 const UserImage = styled.img`
