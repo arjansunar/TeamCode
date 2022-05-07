@@ -1,7 +1,7 @@
 type Props = {};
 
-const notification = (props: Props) => {
+const Notification = (props: Props) => {
   return <div style={{ color: "black" }}>notification</div>;
 };
 
-export default notification;
+export default Notification;

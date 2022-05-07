@@ -5,7 +5,7 @@ import ChatUsers from "../src/components/chat/ChatUsers";
 
 type Props = {};
 
-const chat = (props: Props) => {
+const Chat = (props: Props) => {
   return (
     <Container>
       <ChatUsers />
@@ -14,7 +14,7 @@ const chat = (props: Props) => {
   );
 };
 
-export default chat;
+export default Chat;
 
 const Container = styled.main`
   display: grid;

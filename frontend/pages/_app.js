@@ -35,14 +35,19 @@ const GlobalStyleWithReset = createGlobalStyle`
   }
   }
 `;
+function sideBarLayout(page) {
+  return <LayoutSidebar>{page}</LayoutSidebar>;
+}
 
 function MyApp({ Component, pageProps }) {
+  // Use the layout defined at the page level, if available
+  const getLayout = Component.getLayout || sideBarLayout;
+
   return (
     <>
       <GlobalStyleWithReset />
-      <LayoutSidebar>
-        <Component {...pageProps} />
-      </LayoutSidebar>
+
+      {getLayout(<Component {...pageProps} />)}
     </>
   );
 }

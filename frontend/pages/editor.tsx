@@ -54,7 +54,7 @@ const getSubmissionResults = async (
   });
 };
 
-const editor = (props: Props) => {
+const Editor = (props: Props) => {
   const [code, setCode] = useState<string>("");
   const [output, setOutput] = useState<ExecutionResults>(
     {} as ExecutionResults
@@ -110,4 +110,4 @@ const Button = styled.button`
   border-radius: 0.2rem;
   cursor: pointer;
 `;
-export default editor;
+export default Editor;
