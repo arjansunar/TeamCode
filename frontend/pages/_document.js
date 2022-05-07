@@ -10,6 +10,7 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500&display=swap"
           rel="stylesheet"
         />
+        <title>TeamCode</title>
       </Head>
       <body>
         <Main />

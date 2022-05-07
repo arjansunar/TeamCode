@@ -12,6 +12,10 @@
     "message": {
       "bg-light-blue": "#2999fd",
       "bg-gray": "#26292c"
-    }
+    },
+    "github-green-45": "hsl(131, 55%, 45%, 1)",
+    "github-green-50": "hsl(131, 55%, 50%, 1)",
+    "github-green-60": "hsl(131, 55%, 60%, 1)",
+    "github-green-70": "hsl(131, 55%, 70%, 1)"
   }
 }
