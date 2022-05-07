@@ -10,7 +10,7 @@ type Props = {};
 function Login({}: Props) {
   const handleLoginWithGithub = () => {
     window.open(
-      "http://youtube.com",
+      "http://github.com",
       "popup",
       "toolbar=yes,scrollbars=yes,resizable=yes,top=200,left=600,width=600,height=600"
     );
