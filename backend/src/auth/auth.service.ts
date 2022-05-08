@@ -50,7 +50,7 @@ export class AuthService {
 
   async githubLogin(req) {
     if (!req.user) {
-      return 'No user from github';
+      return { message: 'No user from github' };
     }
 
     const user = { ...req.user };

@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -24,6 +25,7 @@ export class AuthController {
   @UseGuards(AuthGuard('github'))
   async githubAuthRedirect(@Req() req) {
     req.user.tokens = await this.authService.login(req.user);
+    console.log(req.user);
     return await this.authService.githubLogin({ ...req });
   }
 

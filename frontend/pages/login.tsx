@@ -1,20 +1,23 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect } from "react";
 import styled from "styled-components";
 // theme
 import colors from "./../src/theme/colors.json";
 // icon
 import { GoMarkGithub as GitHubIcon } from "react-icons/go";
+import axios from "axios";
 
 type Props = {};
 
 function Login({}: Props) {
   const handleLoginWithGithub = () => {
-    window.open(
-      "http://github.com",
-      "popup",
-      "toolbar=yes,scrollbars=yes,resizable=yes,top=200,left=600,width=600,height=600"
-    );
+    window.open("http://127.0.0.1:5000/auth", "_self");
   };
+
+  // useEffect(() => {
+  //   (async () => {
+  //     const { data } = await axios.get("http://127.0.0.1:5000/auth/login");
+  //   })();
+  // }, []);
   return (
     <Container>
       <LoginFormContainer>
