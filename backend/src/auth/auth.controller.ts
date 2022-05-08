@@ -1,7 +1,7 @@
-import { HttpService } from '@nestjs/axios';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { UserLoginDTO } from './dto/user-login.dto';
@@ -23,10 +23,28 @@ export class AuthController {
   @Get('/github/callback')
   @Public()
   @UseGuards(AuthGuard('github'))
-  async githubAuthRedirect(@Req() req) {
+  async githubAuthRedirect(
+    @Req() req,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     req.user.tokens = await this.authService.login(req.user);
-    console.log(req.user);
-    return await this.authService.githubLogin({ ...req });
+    const authData = JSON.stringify(
+      await this.authService.githubLogin({ ...req }),
+    );
+    console.log({ authData });
+    res.cookie('auth data', authData, {
+      path: 'http://localhost:3000/login',
+    });
+
+    return;
+  }
+
+  @Get('/cookie')
+  @Public()
+  async getCookie(@Res({ passthrough: true }) res: Response) {
+    res.cookie('data', 'data');
+    // res.redirect('http://localhost:3000/login');
+    return { message: 'cookie set' };
   }
 
   @Get('/refresh')
