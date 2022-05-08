@@ -55,33 +55,14 @@ export class AuthService {
 
     const user = { ...req.user };
     const tokens: Tokens = { ...user?.tokens };
-    // finding the user with the id
-    const dbUser = await this.userService.findUserWithId(+user.id);
-
-    if (!dbUser) {
-      // saving user
-      const newUser: UserCreateDTO = {
-        id: parseInt(user?.id),
-        email: user?.email,
-        photo: user?.photo,
-        username: user?.username,
-        hashedRt: await this.hashData(
-          this.getUniqueTokenString(tokens.refresh_token),
-        ),
-      };
-      await this.userService.createUser(newUser);
-    } else {
-      // updating user hash
-      await this.updateUserHashRt(tokens.refresh_token, +user.id);
-
-      return {
-        message: 'User from db',
-        user: user,
-      };
-    }
+    // updating user hash
+    const updatedUser = await this.updateUserHashRt(
+      tokens.refresh_token,
+      +user.id,
+    );
     return {
-      message: 'User info from github',
-      user: user,
+      user: updatedUser,
+      access_token: tokens.access_token,
     };
   }
 

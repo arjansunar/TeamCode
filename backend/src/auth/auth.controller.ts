@@ -31,12 +31,10 @@ export class AuthController {
     const authData = JSON.stringify(
       await this.authService.githubLogin({ ...req }),
     );
-    // console.log({ authData });
     res.cookie('authData', authData, {
       path: 'http://localhost:3000/login',
     });
-    // res.header('auth-data', JSON.stringify(authData));
-    res.redirect('http://localhost:3000/login');
+    // res.redirect('http://localhost:3000/login');
   }
 
   @Get('/refresh')
