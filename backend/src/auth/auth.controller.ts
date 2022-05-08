@@ -1,7 +1,7 @@
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { UserLoginDTO } from './dto/user-login.dto';
@@ -31,20 +31,12 @@ export class AuthController {
     const authData = JSON.stringify(
       await this.authService.githubLogin({ ...req }),
     );
-    console.log({ authData });
-    res.cookie('auth data', authData, {
+    // console.log({ authData });
+    res.cookie('authData', authData, {
       path: 'http://localhost:3000/login',
     });
-
-    return;
-  }
-
-  @Get('/cookie')
-  @Public()
-  async getCookie(@Res({ passthrough: true }) res: Response) {
-    res.cookie('data', 'data');
-    // res.redirect('http://localhost:3000/login');
-    return { message: 'cookie set' };
+    // res.header('auth-data', JSON.stringify(authData));
+    res.redirect('http://localhost:3000/login');
   }
 
   @Get('/refresh')

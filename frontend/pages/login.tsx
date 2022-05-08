@@ -11,10 +11,6 @@ type Props = {};
 function Login({}: Props) {
   const handleLoginWithGithub = () => {
     window.open("http://127.0.0.1:5000/auth/", "_self");
-    // (async () => {
-    //   const { data } = await axios.get("http://127.0.0.1:5000/auth/");
-    //   console.log("axios data", data);
-    // })();
   };
 
   return (
