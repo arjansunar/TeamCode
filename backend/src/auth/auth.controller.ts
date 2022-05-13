@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -13,13 +14,13 @@ import { UserLoggedGuard } from './guards/user-loggin.guard';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // routes to access github oauth
+  // route to access github oauth
   @Get('/')
   @Public()
   @UseGuards(AuthGuard('github'))
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async githubAuth() {}
 
+  // callback url called after github strategy validates the user
   @Get('/github/callback')
   @Public()
   @UseGuards(AuthGuard('github'))
@@ -31,10 +32,10 @@ export class AuthController {
     const authData = JSON.stringify(
       await this.authService.githubLogin({ ...req }),
     );
-    res.cookie('authData', authData, {
-      path: 'http://localhost:3000/login',
-    });
-    // res.redirect('http://localhost:3000/login');
+
+    // send this data to react app on a different origin
+    res.cookie('auth-data', authData);
+    res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
   }
 
   @Get('/refresh')

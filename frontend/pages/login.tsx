@@ -5,10 +5,18 @@ import colors from "./../src/theme/colors.json";
 // icon
 import { GoMarkGithub as GitHubIcon } from "react-icons/go";
 import axios from "axios";
+import { useRouter } from "next/router";
+import { setCookie } from "nookies";
 
 type Props = {};
 
 function Login({}: Props) {
+  // const { query: queryParams } = useRouter();
+
+  // const authData = [queryParams.auth_data].join();
+  // console.log({ authData });
+  // setCookie(null, "auth_data", authData);
+
   const handleLoginWithGithub = () => {
     window.open("http://127.0.0.1:5000/auth/", "_self");
   };
