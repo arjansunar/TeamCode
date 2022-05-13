@@ -33,9 +33,8 @@ export class AuthController {
       await this.authService.githubLogin({ ...req }),
     );
 
-    // send this data to react app on a different origin
-    res.cookie('auth-data', authData);
-    res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
+    // res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
+    return authData;
   }
 
   @Get('/refresh')

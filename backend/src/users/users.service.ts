@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserCreateDTO } from './dto/user-create.dto';
 
@@ -30,6 +31,18 @@ export class UsersService {
       },
       data: {
         hashedRt: hashRt,
+      },
+    });
+  }
+
+  // update user role
+  async updateUserRole(id, role: Role) {
+    return this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        role,
       },
     });
   }

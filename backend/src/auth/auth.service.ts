@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma';
 import { UserCreateDTO } from 'src/users/dto';
 import { UsersService } from 'src/users';
 import { Tokens, UserLoginDTO } from './dto';
+import { TokenPayload } from './types';
 @Injectable()
 export class AuthService {
   constructor(
@@ -60,8 +61,9 @@ export class AuthService {
       tokens.refresh_token,
       +user.id,
     );
+    const { hashedRt, ...safeUserdata } = updatedUser;
     return {
-      user: updatedUser,
+      user: safeUserdata,
       access_token: tokens.access_token,
     };
   }

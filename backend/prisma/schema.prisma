@@ -10,6 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  STUDENT
+  TEACHER
+}
+
 model User {
   id          Int      @unique
   username    String 
@@ -18,6 +23,8 @@ model User {
   updatedAt   DateTime @updatedAt
 
   email       String   @unique
+  role        Role     @default(STUDENT)
+
   hashedRt    String?  
   
   @@map("users")

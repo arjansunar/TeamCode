@@ -18,8 +18,8 @@ async function bootstrap() {
   app.enableCors(options);
   app.use(cookieParser());
 
-  // const reflector = app.get(Reflector);
-  // app.useGlobalGuards(new JwtAuthGuard(reflector));
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   const config = new DocumentBuilder()
     .setTitle('TeamCode Api')
