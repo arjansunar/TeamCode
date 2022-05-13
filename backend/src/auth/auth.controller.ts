@@ -6,8 +6,8 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Public } from './decorator/public.decorator';
 import { UserLoginDTO } from './dto/user-login.dto';
-import { JwtRefreshAuthGuard } from './guards/jwt-rt.guard';
-import { UserLoggedGuard } from './guards/user-loggin.guard';
+import { JwtRefreshAuthGuard } from './guard/jwt-rt.guard';
+import { UserLoggedGuard } from './guard/user-loggin.guard';
 
 @Controller('auth')
 @ApiTags('Authentication route')

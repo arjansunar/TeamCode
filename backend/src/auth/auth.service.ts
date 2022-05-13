@@ -2,10 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma';
-import { UserCreateDTO } from 'src/users/dto';
 import { UsersService } from 'src/users';
 import { Tokens, UserLoginDTO } from './dto';
-import { TokenPayload } from './types';
 @Injectable()
 export class AuthService {
   constructor(
@@ -61,6 +59,7 @@ export class AuthService {
       tokens.refresh_token,
       +user.id,
     );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { hashedRt, ...safeUserdata } = updatedUser;
     return {
       user: safeUserdata,
@@ -69,7 +68,7 @@ export class AuthService {
   }
 
   async login(user: UserLoginDTO): Promise<Tokens> {
-    const payload = { username: user.username, sub: user.id };
+    const payload = { username: user.username, sub: user.id, role: 'STUDENT' };
     const tokenDate = new Date();
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
