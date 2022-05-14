@@ -99,6 +99,7 @@ const LoginGitHubButton = styled.button`
   display: flex;
   align-items: flex-start;
   justify-content: center;
+  cursor: pointer;
 
   &:hover {
     background-color: ${colors.theme["github-green-50"]};

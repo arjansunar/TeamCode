@@ -34,7 +34,8 @@ export class AuthController {
     );
 
     // res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
-    return authData;
+    res.redirect(`http://localhost:3000/api/auth?auth_data=${authData}`);
+    // return authData;
   }
 
   @Get('/refresh')
