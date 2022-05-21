@@ -21,10 +21,7 @@ export const RoomProvider = ({ children }) => {
 
       setMe(userPeer);
 
-      ws.on("user-disconnect", () => console.log("left:"));
-      ws.on("client-joined", ({ roomId }) => {
-        console.log("client-joined", roomId);
-      });
+      ws.on("user-disconnect", ({ peerId }) => console.log("left:", peerId));
 
       const getUsers = ({ participants }) => {
         console.log({ participants });
@@ -45,11 +42,13 @@ export const RoomProvider = ({ children }) => {
     if (!me || !audioStream) return;
     // initiation
     ws.on("user-joined", ({ peerId }) => {
-      const call = me.call(peerId, audioStream);
+      const myId = me._id;
+      console.log({ peerId, myId });
+      // const call = me.call(peerId, audioStream);
     });
     // answer
     me.on("call", (call) => {
-      call.answer(audioStream);
+      // call.answer(audioStream);
     });
   }, [me, audioStream]);
   return (

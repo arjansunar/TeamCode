@@ -37,6 +37,7 @@ const JoinMeeting = () => {
       return;
     }
     ws.emit("join-room", { roomId, peerId: me._id });
+    console.log("user join req");
   };
   return <button onClick={clickHandler}>join</button>;
 };
