@@ -30,28 +30,35 @@ export class SignallServerGateway implements OnGatewayInit {
     this.logger.log('Initialized');
   }
 
-  @SubscribeMessage('join room')
+  @SubscribeMessage('join-room')
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() roomID: string,
+    @MessageBody() roomId: string,
   ) {
-    if (this.rooms[roomID]) {
+    if (this.rooms[roomId]) {
       // Receiving peer joins the room
-      this.rooms[roomID].push(client.id);
+      this.rooms[roomId].push(client.id);
     } else {
       // Initiating peer create a new room
-      this.rooms[roomID] = [client.id];
+      this.rooms[roomId] = [client.id];
     }
+
+    this.server.emit('joined', {
+      rooms: this.rooms,
+      id: roomId,
+    });
+
+    console.log('websocket rooms', this.rooms);
 
     /*
       If both initiating and receiving peer joins the room,
       we will get the other user details.
       For initiating peer it would be receiving peer and vice versa.
   */
-    const otherUser = this.rooms[roomID].find((id) => id !== client.id);
+    const otherUser = this.rooms[roomId].find((id) => id !== client.id);
     if (otherUser) {
-      client.emit('other user', otherUser);
-      client.to(otherUser).emit('user joined', client.id);
+      client.emit('other-user', otherUser);
+      client.to(otherUser).emit('user-joined', client.id);
     }
   }
 
