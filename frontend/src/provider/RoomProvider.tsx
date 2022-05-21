@@ -44,11 +44,11 @@ export const RoomProvider = ({ children }) => {
     ws.on("user-joined", ({ peerId }) => {
       const myId = me._id;
       console.log({ peerId, myId });
-      // const call = me.call(peerId, audioStream);
+      const call = me.call(peerId, audioStream);
     });
     // answer
     me.on("call", (call) => {
-      // call.answer(audioStream);
+      call.answer(audioStream);
     });
   }, [me, audioStream]);
   return (
