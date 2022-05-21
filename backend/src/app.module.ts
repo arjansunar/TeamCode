@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { SignallServerModule } from './signall-server/signall-server.module';
+import { RoomsModule } from './rooms/rooms.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SignallServerModule } from './signall-server/signall-server.module';
     UsersModule,
     PrismaModule,
     SignallServerModule,
+    RoomsModule,
   ],
   providers: [
     {
