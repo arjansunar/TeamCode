@@ -34,29 +34,27 @@ export const RoomProvider: FC<Props> = ({ children }) => {
   const [audioStream, setAudioStream] = useState<MediaStream>();
 
   useEffect(() => {
-    import("peerjs").then(({ default: Peer }) => {
-      const userId = uuidV4();
-      const userPeer = new Peer(userId, {
-        host: "localhost",
-        port: 9000,
-        path: "/teamCode",
-      });
-
-      setMe(userPeer);
-
-      const getUsers = ({ participants }) => {
-        console.log({ participants });
-      };
-      ws.on("get-users", getUsers);
-
-      try {
-        navigator.mediaDevices
-          .getUserMedia({ audio: true, video: true })
-          .then((stream) => setAudioStream(stream));
-      } catch (err) {
-        console.error(err);
-      }
+    const userId = uuidV4();
+    const userPeer = new Peer(userId, {
+      host: "localhost",
+      port: 9000,
+      path: "/teamCode",
     });
+
+    setMe(userPeer);
+
+    const getUsers = ({ participants }: { participants: [] }) => {
+      console.log({ participants });
+    };
+    ws.on("get-users", getUsers);
+
+    try {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true, video: true })
+        .then((stream) => setAudioStream(stream));
+    } catch (err) {
+      console.error(err);
+    }
   }, []);
 
   useEffect(() => {
@@ -78,7 +76,7 @@ export const RoomProvider: FC<Props> = ({ children }) => {
     });
 
     ws.on("user-disconnect", ({ peerId }) => {
-      console.log("user disconnected ");
+      // console.log("user disconnected ", peerId, peers);
       dispatch(removePeerStreamAction(peerId));
     });
   }, [me, audioStream]);

@@ -1,10 +1,10 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
 import { VideoPlayer } from "../../components/chat/VideoPlayer";
 import { RoomContext, RoomProvider } from "../../provider/RoomProvider";
 import { PeerState } from "../../store/reducer/peerReducer";
-
+import Peer from "peerjs";
 // router params
 import { useParams } from "react-router-dom";
 
@@ -28,14 +28,24 @@ const Room = () => {
 // components
 
 const VideoWrapper = () => {
-  const { audioStream, peers } = useContext(RoomContext);
-  console.log({ peers });
+  const {
+    peers,
+    me,
+    audioStream,
+  }: { peers: PeerState; me: Peer; audioStream: MediaStream } =
+    useContext(RoomContext);
+  peers;
+  if (!peers || !me) return <div>no users</div>;
+
+  const otherUsers = Object.keys(peers).filter((ids) => ids !== me.id);
+  console.table(otherUsers);
+  console.log(me.id);
   return (
     <div>
       <VideoPlayer stream={audioStream} />
       {peers
-        ? Object.values(peers as PeerState).map((peer, index) => {
-            return <VideoPlayer stream={peer.stream} key={index} />;
+        ? otherUsers.map((peerId, index) => {
+            return <VideoPlayer stream={peers[peerId].stream} key={index} />;
           })
         : null}
     </div>

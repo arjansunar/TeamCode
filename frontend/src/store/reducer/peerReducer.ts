@@ -49,12 +49,9 @@ export const peersReducer = (state: PeerState, action: PeerAction) => {
         },
       };
     case REMOVE_PEER_STREAM:
+      const { [action.payload.peerId]: deleted, ...rest } = state;
       return {
-        ...state,
-        [action.payload.peerId]: {
-          ...state[action.payload.peerId],
-          stream: undefined,
-        },
+        ...rest,
       };
     case ADD_ALL_PEERS:
       return { ...state, ...action.payload.peers };
