@@ -7,6 +7,6 @@ export const VideoPlayer: React.FC<{ stream?: MediaStream }> = ({ stream }) => {
     if (videoRef.current && stream) videoRef.current.srcObject = stream;
   }, [stream]);
   return (
-    <video style={{ width: "100%" }} ref={videoRef} autoPlay muted={true} />
+    <video style={{ width: "60%" }} ref={videoRef} autoPlay muted={true} />
   );
 };

@@ -1,4 +1,4 @@
 export const isClient =
   typeof window !== "undefined" &&
-  window.document &&
-  window.document.createElement;
+  Boolean(window.document) &&
+  Boolean(window.document.createElement);
