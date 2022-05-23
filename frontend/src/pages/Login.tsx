@@ -1,22 +1,11 @@
-import React, { ReactElement, useEffect } from "react";
 import styled from "styled-components";
 // theme
-import colors from "./../src/theme/colors.json";
+import colors from "../theme/colors.json";
 // icon
 import { GoMarkGithub as GitHubIcon } from "react-icons/go";
-import axios from "axios";
-import { useRouter } from "next/router";
-import { setCookie } from "nookies";
-
 type Props = {};
 
 function Login({}: Props) {
-  // const { query: queryParams } = useRouter();
-
-  // const authData = [queryParams.auth_data].join();
-  // console.log({ authData });
-  // setCookie(null, "auth_data", authData);
-
   const handleLoginWithGithub = () => {
     window.open("http://127.0.0.1:5000/auth/", "_self");
   };
@@ -43,10 +32,6 @@ function Login({}: Props) {
     </Container>
   );
 }
-
-Login.getLayout = function getLayout(page: ReactElement) {
-  return <>{page}</>;
-};
 
 export default Login;
 
@@ -107,6 +92,7 @@ const LoginGitHubButton = styled.button`
 `;
 
 const NextButton = styled.button`
+  font-size: 1rem;
   padding: 0.4rem 0.8rem;
 
   border: none;

@@ -1,8 +1,7 @@
-import { ReactChild, ReactNode } from "react";
+import { ReactNode } from "react";
 import styled from "styled-components";
 import colors from "../theme/colors.json";
 
-import { useRouter } from "next/router";
 import { IconType } from "react-icons";
 import { BsChatLeftTextFill as ChatIcon } from "react-icons/bs";
 
@@ -10,6 +9,8 @@ import { AiFillCode as EditorIcon } from "react-icons/ai";
 
 import { IoMdNotifications as NotificationIcon } from "react-icons/io";
 
+// router
+import { useNavigate } from "react-router-dom";
 type Props = {
   children?: ReactNode;
 };
@@ -30,9 +31,9 @@ export const LayoutSidebar = ({ children }: Props) => {
 };
 
 const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const changeRoute = () => {
-    router.push(route);
+    navigate(route);
   };
   return (
     <IconWrapper onClick={changeRoute}>
@@ -42,13 +43,15 @@ const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
 };
 
 const SidebarContainer = styled.div`
-  height: 100vh;
+  --padding-top: 2rem;
+  height: calc(100vh);
   background-color: ${colors.theme["dark-400"]};
-  padding-top: 2rem;
+  padding-top: var(--padding-top);
 `;
 const Layout = styled.div`
   display: grid;
   grid-template-columns: 3.5rem 1fr;
+  overflow: hidden;
 `;
 
 const IconsContainer = styled.div`

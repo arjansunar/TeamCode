@@ -1,4 +1,4 @@
-import { cloneElement, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import styled from "styled-components";
 import colors from "../../theme/colors.json";
 
@@ -63,20 +63,24 @@ const users = [
 
 const ChatUsers = (props: Props) => {
   const [searchUser, setSearchUser] = useState("");
-  const handleSearchChange = (val) => {
-    setSearchUser(val?.target?.value);
+  const handleSearchChange = (val: ChangeEvent) => {
+    // @ts-ignore
+    const searchText = val.target.value;
+    if (!searchText) return;
+    setSearchUser(searchText);
   };
 
   const handleSearchSubmit = () => {
     console.log({ searchUser });
   };
+  console.log({ searchUser });
   return (
     <Container>
       <SearchWrapper onSubmit={(e) => e.preventDefault()}>
         <SearchBar
           placeholder="Search User"
           value={searchUser}
-          onChange={handleSearchChange}
+          onChange={(e) => handleSearchChange(e)}
         />
         <SearchButton onClick={handleSearchSubmit}>
           <SearchIcon />
@@ -101,7 +105,7 @@ const ChatUsers = (props: Props) => {
 const Container = styled.div`
   background-color: ${colors.theme["dark-500"]};
   padding: 1rem 1.5rem;
-  height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
 `;
 
@@ -135,11 +139,11 @@ const UsersContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  margin: 2rem 0;
+  margin: 2rem auto 0 auto;
   gap: 1rem;
   overflow-y: scroll;
-  height: 85%;
-  /* width */
+  height: 80%;
+  max-width: 100%;
   ::-webkit-scrollbar {
     width: 0px;
   }
@@ -164,7 +168,7 @@ const UserContainer = styled.div`
   width: 100%;
   align-items: center;
   background-color: ${colors.theme["dark-300"]};
-  padding-right: 1.5rem;
+  /* padding-right: 1.5rem; */
   border-radius: 0.5rem;
 `;
 export default ChatUsers;

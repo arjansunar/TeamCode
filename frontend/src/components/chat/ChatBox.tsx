@@ -78,6 +78,7 @@ const Container = styled.div`
   display: grid;
   grid-template-rows: 60px 1fr 80px;
   height: 100vh;
+  overflow: hidden;
 `;
 
 const Header = styled.div`

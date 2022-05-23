@@ -1,11 +1,18 @@
-import { createContext, useEffect, useReducer, useState } from "react";
+import {
+  createContext,
+  FC,
+  ReactNode,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import SocketIoClient from "socket.io-client";
 import { v4 as uuidV4 } from "uuid";
-import { isClient } from "../../lib/utills";
 import {
   addPeerStreamAction,
   removePeerStreamAction,
 } from "../store/actions/peerActions";
+import Peer from "peerjs";
 import { peersReducer } from "../store/reducer/peerReducer";
 
 const WS_URL = "http://localhost:5001";
@@ -13,9 +20,12 @@ const WS_URL = "http://localhost:5001";
 const ws = SocketIoClient(WS_URL);
 export const RoomContext = createContext<null | any>(null);
 
-export const RoomProvider = ({ children }) => {
+interface Props {
+  children: ReactNode;
+}
+export const RoomProvider: FC<Props> = ({ children }) => {
   // reference to the user peer "me"
-  const [me, setMe] = useState<null | any>();
+  const [me, setMe] = useState<null | Peer>();
 
   // reducers for working with peer
   const [peers, dispatch] = useReducer(peersReducer, {});
@@ -40,12 +50,9 @@ export const RoomProvider = ({ children }) => {
       ws.on("get-users", getUsers);
 
       try {
-        if (isClient) {
-          navigator.mediaDevices
-            .getUserMedia({ audio: true, video: true })
-            .then((stream) => setAudioStream(stream));
-          console.log({ isClient });
-        }
+        navigator.mediaDevices
+          .getUserMedia({ audio: true, video: true })
+          .then((stream) => setAudioStream(stream));
       } catch (err) {
         console.error(err);
       }
@@ -53,7 +60,7 @@ export const RoomProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (!me || !audioStream || !isClient) return;
+    if (!me || !audioStream) return;
     // initiation
     ws.on("user-joined", ({ peerId }) => {
       const call = me.call(peerId, audioStream);

@@ -1,15 +1,13 @@
 import { AxiosResponse } from "axios";
-import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
-import { ExecutionResults } from "../src/api/hooks/types/CodeExecutionRes";
-import { axiosJudge0 } from "../src/api/hooks/useAxios";
+import { ExecutionResults } from "../api/hooks/types/CodeExecutionRes";
+import { axiosJudge0 } from "../api/hooks/useAxios";
 /* components */
-import { OutputScreen } from "../src/components";
-import colors from "../src/theme/colors.json";
-const AceEditor = dynamic(import("../src/components/AceEditor"), {
-  ssr: false,
-});
+import { OutputScreen } from "../components";
+import colors from "../theme/colors.json";
+
+import AceEditor from "../components/AceEditor";
 type Props = {};
 
 interface SubmissionSchema {
@@ -17,7 +15,7 @@ interface SubmissionSchema {
   source_code: string;
   stdin: string;
 }
-const jsSubmissionSchema = (code): SubmissionSchema => {
+const jsSubmissionSchema = (code: string): SubmissionSchema => {
   return {
     language_id: 63,
     source_code: code,
@@ -30,14 +28,13 @@ const submissionHeaders = {
 };
 // creates a instance for code execution and returns the token to access the execution data
 const createSubmission = (code: string) => {
-  const encodedCode = Buffer.from(code).toString("base64");
-  // console.log({ encodedCode });
+  const encodedCode = btoa(code);
   const jsSubmission = jsSubmissionSchema(encodedCode);
   return jsSubmission;
 };
 
 const getSubmissionToken = async (
-  code
+  code: string
 ): Promise<{ data: { token: string } }> => {
   const createSubmissionData = createSubmission(code);
   return await axiosJudge0.post("submissions", createSubmissionData, {
