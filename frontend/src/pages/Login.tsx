@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { axiosTeamCode } from "../api/hooks";
-import { UserData } from "../provider/UserProvider";
+import { UserContext } from "../provider/UserProvider";
 type Props = {};
 
 type Role = "STUDENT" | "TEACHER";

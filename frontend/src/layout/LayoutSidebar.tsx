@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import { ReactElement, ReactNode, useContext } from "react";
 import styled from "styled-components";
 import colors from "../theme/colors.json";
 
@@ -10,7 +10,7 @@ import { AiFillCode as EditorIcon } from "react-icons/ai";
 import { IoMdNotifications as NotificationIcon } from "react-icons/io";
 
 // router
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext, UserData } from "../provider/UserProvider";
 type Props = {
   children?: ReactNode;
@@ -27,7 +27,9 @@ export const LayoutSidebar = ({ children }: Props) => {
           <LinkButton route="/editor" Icon={EditorIcon} />
           <LinkButton route="/notification" Icon={NotificationIcon} />
           {user && user.photo && (
-            <UserProfile src={user.photo} alt={user.username} />
+            <Link to="/meeting">
+              <UserProfile src={user.photo} alt={user.username} />
+            </Link>
           )}
         </IconsContainer>
       </SidebarContainer>
@@ -36,7 +38,13 @@ export const LayoutSidebar = ({ children }: Props) => {
   );
 };
 
-const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
+const LinkButton = ({
+  Icon,
+  route,
+}: {
+  Icon: IconType | ReactElement;
+  route: string;
+}) => {
   const navigate = useNavigate();
   const changeRoute = () => {
     navigate(route);

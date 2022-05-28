@@ -28,6 +28,16 @@ model User {
   peerId      String?  @unique
 
   hashedRt    String?  
+  createdRoom Room? @relation(name: "owner")
+  meeting     Room? @relation(fields: [meetingId], references: [id])
+  meetingId   String?
   
   @@map("users")
+}
+
+model Room {
+  id        String @unique
+  owner     User @relation(name: "owner",fields: [ownerId],   references: [id])
+  ownerId   Int 
+  participants User[] 
 }

@@ -8,8 +8,9 @@ export interface UserData {
   createdAt: string;
   updatedAt: string;
   email: string;
-  role: string;
+  role: "TEACHER" | "STRING";
   peerId: string;
+  meetingId?: string;
 }
 
 const UserContext = createContext<null | any>(null);

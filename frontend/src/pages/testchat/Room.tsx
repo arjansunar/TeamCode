@@ -7,6 +7,7 @@ import { PeerState } from "../../store/reducer/peerReducer";
 import Peer, { DataConnection } from "peerjs";
 // router params
 import { useParams } from "react-router-dom";
+import { UserContext, UserData } from "../../provider/UserProvider";
 
 type Props = {
   roomId: string;
@@ -128,7 +129,7 @@ const VideoWrapper = () => {
 const JoinMeeting = () => {
   const roomId = "fc2829a2-0993-43a4-b345-f09997e3c658";
   const { ws, me }: { ws: Socket; me: any } = useContext(RoomContext);
-  const [userId, setUserId] = useState<number>();
+  const { user }: { user: UserData } = useContext(UserContext);
   const clickHandler = () => {
     if (!me) {
       console.log("no peer created yet!!");
@@ -137,18 +138,12 @@ const JoinMeeting = () => {
     ws.emit("join-room", { roomId, peerId: me._id });
     ws.emit("update-user-peer-id", {
       peerId: me._id,
-      userId: userId,
+      userId: user.id,
       roomId: roomId,
     });
   };
   return (
     <DebugText className="">
-      <label htmlFor="user">UserId</label>
-      <input
-        type="number"
-        value={userId}
-        onChange={(e) => setUserId(parseInt(e.target.value))}
-      />
       <button onClick={clickHandler}>join</button>
       <br />
     </DebugText>

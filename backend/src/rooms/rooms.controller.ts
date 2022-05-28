@@ -16,8 +16,8 @@ export class RoomsController {
   @Post('/generate')
   @Role(UserRole.TEACHER)
   @UseGuards(RoleGuard)
-  createRoom(@GetUser('id') ownerId) {
-    return this.roomsService.createNewRoom(ownerId);
+  async createRoom(@GetUser('id') ownerId) {
+    return await this.roomsService.createNewRoom(ownerId);
   }
 
   @Get('/room-details/:roomId')

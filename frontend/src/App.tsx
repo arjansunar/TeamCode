@@ -15,6 +15,7 @@ import Notification from "./pages/Notification";
 import Error from "./pages/Error";
 import { useCookies } from "react-cookie";
 import { axiosTeamCode } from "./api/hooks";
+import Meeting from "./pages/Meeting";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -89,6 +90,14 @@ function App() {
           element={
             <SideBarWrapper>
               <Notification />
+            </SideBarWrapper>
+          }
+        />
+        <Route
+          path="/meeting"
+          element={
+            <SideBarWrapper>
+              <Meeting />
             </SideBarWrapper>
           }
         />

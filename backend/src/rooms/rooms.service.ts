@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma';
+import { UsersService } from 'src/users';
 import { v4 as uuidv4 } from 'uuid';
 import { Room } from './types';
 
@@ -7,16 +8,22 @@ import { Room } from './types';
 export class RoomsService {
   private rooms: Room[] = [] as Room[];
 
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private usersService: UsersService,
+  ) {}
 
-  createNewRoom(ownerId: number) {
-    const newRoom: Room = {
-      id: uuidv4(),
-      members: [],
-      ownerId,
-    };
-    this.rooms.push(newRoom);
-    return newRoom.id;
+  async createNewRoom(ownerId: number) {
+    const owner = await this.usersService.findUserWithId(ownerId);
+
+    if (!owner) return new NotFoundException('Owner not found');
+    const newRoom = this.prismaService.room.create({
+      data: {
+        id: uuidv4(),
+        ownerId: owner.id,
+      },
+    });
+    return newRoom;
   }
 
   getRoom(roomId: string): Room {
