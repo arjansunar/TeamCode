@@ -4,10 +4,10 @@ import colors from "../theme/colors.json";
 // icon
 import { GoMarkGithub as GitHubIcon } from "react-icons/go";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { axiosTeamCode } from "../api/hooks";
-import { UserContext } from "../provider/UserProvider";
+
 type Props = {};
 
 type Role = "STUDENT" | "TEACHER";
@@ -23,11 +23,8 @@ function Login({}: Props) {
   };
 
   const [searchParams] = useSearchParams();
-  const [cookies, setCookie, removeCookie] = useCookies(["user_data", "token"]);
+  const [cookies, setCookie] = useCookies(["user_data", "token"]);
   const [role, setRole] = useState<Role>("STUDENT");
-
-  const { user } = useContext(UserContext);
-  console.log({ user });
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -57,6 +54,7 @@ function Login({}: Props) {
       });
       const token = data?.access_token;
       if (!token) return;
+
       // updated token for user
       setCookie("token", token);
       if (status === 201) {

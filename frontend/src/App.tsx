@@ -16,6 +16,7 @@ import Error from "./pages/Error";
 import { useCookies } from "react-cookie";
 import { axiosTeamCode } from "./api/hooks";
 import Meeting from "./pages/Meeting";
+import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -60,56 +61,60 @@ function App() {
     <div className="App">
       <GlobalStyleWithReset />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <SideBarWrapper>
-              <Home />
-            </SideBarWrapper>
-          }
-        />
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/chat"
-          element={
-            <SideBarWrapper>
-              <Chat />
-            </SideBarWrapper>
-          }
-        />
-        <Route
-          path="/editor"
-          element={
-            <SideBarWrapper>
-              <Editor />
-            </SideBarWrapper>
-          }
-        />
-        <Route
-          path="/notification"
-          element={
-            <SideBarWrapper>
-              <Notification />
-            </SideBarWrapper>
-          }
-        />
-        <Route
-          path="/meeting"
-          element={
-            <SideBarWrapper>
-              <Meeting />
-            </SideBarWrapper>
-          }
-        />
-        <Route
-          path="/room/:roomId"
-          element={
-            <SideBarWrapper>
-              <Room />
-            </SideBarWrapper>
-          }
-        />
-        <Route path="/error" element={<Error />} />
+        {/* protected routes */}
+        <Route element={<ProtectedRoutes />}>
+          <Route
+            path="/"
+            element={
+              <SideBarWrapper>
+                <Home />
+              </SideBarWrapper>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <SideBarWrapper>
+                <Chat />
+              </SideBarWrapper>
+            }
+          />
+          <Route
+            path="/editor"
+            element={
+              <SideBarWrapper>
+                <Editor />
+              </SideBarWrapper>
+            }
+          />
+          <Route
+            path="/notification"
+            element={
+              <SideBarWrapper>
+                <Notification />
+              </SideBarWrapper>
+            }
+          />
+          <Route
+            path="/meeting"
+            element={
+              <SideBarWrapper>
+                <Meeting />
+              </SideBarWrapper>
+            }
+          />
+          <Route
+            path="/room/:roomId"
+            element={
+              <SideBarWrapper>
+                <Room />
+              </SideBarWrapper>
+            }
+          />
+          <Route path="/error" element={<Error />} />
+        </Route>
+        {/* end protected routes */}
       </Routes>
     </div>
   );

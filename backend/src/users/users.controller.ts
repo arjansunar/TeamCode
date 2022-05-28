@@ -14,6 +14,13 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  @Get('/is-logged-in')
+  async isLoggedIn(@GetUser('id') id: number) {
+    const user = await this.usersService.findUserWithId(id);
+
+    return { isLoggedIn: !!user && !!user.hashedRt };
+  }
+
   @Get('/me')
   async getMe(@GetUser() user) {
     return user;
