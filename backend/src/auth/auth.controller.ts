@@ -33,8 +33,8 @@ export class AuthController {
       await this.authService.githubLogin({ ...req }),
     );
 
-    // res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
-    res.redirect(`http://localhost:3000/api/auth?auth_data=${authData}`);
+    res.redirect(`http://localhost:3000/login?auth_data=${authData}`);
+    // res.redirect(`http://localhost:3000/api/auth?auth_data=${authData}`);
     // return authData;
   }
 

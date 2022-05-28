@@ -1,4 +1,4 @@
-import { FC, ReactElement, ReactNode, useState } from "react";
+import { FC, ReactElement, ReactNode, useEffect, useState } from "react";
 import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import colors from "./theme/colors.json";
@@ -12,6 +12,9 @@ import Editor from "./pages/Editor";
 import Room from "./pages/testchat/Room";
 import { LayoutSidebar } from "./layout";
 import Notification from "./pages/Notification";
+import Error from "./pages/Error";
+import { useCookies } from "react-cookie";
+import { axiosTeamCode } from "./api/hooks";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -97,6 +100,7 @@ function App() {
             </SideBarWrapper>
           }
         />
+        <Route path="/error" element={<Error />} />
       </Routes>
     </div>
   );

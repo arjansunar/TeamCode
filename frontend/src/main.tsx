@@ -5,11 +5,17 @@ import "./index.css";
 
 // react router
 import { BrowserRouter } from "react-router-dom";
+import { CookiesProvider } from "react-cookie";
+import { UserProvider } from "./provider/UserProvider";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <CookiesProvider>
+        <UserProvider>
+          <App />
+        </UserProvider>
+      </CookiesProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

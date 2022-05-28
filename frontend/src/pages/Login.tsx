@@ -3,20 +3,87 @@ import styled from "styled-components";
 import colors from "../theme/colors.json";
 // icon
 import { GoMarkGithub as GitHubIcon } from "react-icons/go";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import { axiosTeamCode } from "../api/hooks";
+import { UserContext } from "../provider/UserProvider";
 type Props = {};
+
+type Role = "STUDENT" | "TEACHER";
+
+interface AuthData {
+  user: {};
+  access_token: string;
+}
 
 function Login({}: Props) {
   const handleLoginWithGithub = () => {
     window.open("http://127.0.0.1:5000/auth/", "_self");
   };
 
+  const [searchParams] = useSearchParams();
+  const [cookies, setCookie, removeCookie] = useCookies(["user_data", "token"]);
+  const [role, setRole] = useState<Role>("STUDENT");
+
+  const { user } = useContext(UserContext);
+  console.log({ user });
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    const auth_data = searchParams.get("auth_data");
+    if (!auth_data) return;
+    const parsed_auth_data: AuthData = JSON.parse(auth_data);
+    const token = parsed_auth_data.access_token;
+    const user = parsed_auth_data.user;
+    if (!token || !user) return;
+
+    setCookie("user_data", user);
+    setCookie("token", token);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const token = cookies.token;
+    if (!token) return;
+    axiosTeamCode.defaults.headers.common = {
+      Authorization: `Bearer ${token}`,
+    };
+  }, [cookies]);
+
+  const handleRoleSelection = async () => {
+    try {
+      const { data, status } = await axiosTeamCode.post(`/users/role`, {
+        role,
+      });
+      const token = data?.access_token;
+      if (!token) return;
+      // updated token for user
+      setCookie("token", token);
+      if (status === 201) {
+        const userData = cookies.user_data;
+        setCookie("user_data", { ...userData, role });
+        console.log("role created success");
+      }
+    } catch (e) {
+      console.error(e);
+      navigate("/error");
+    }
+  };
   return (
     <Container>
       <LoginFormContainer>
         <LoginText>Get Started with TeamCode</LoginText>
         <RoleWrapper>
           <RoleLabel htmlFor="role">I am a </RoleLabel>
-          <RoleSelect name="role" id="role">
+          <RoleSelect
+            name="role"
+            id="role"
+            value={role}
+            onChange={(e) => {
+              const selectedRole = e.target.value;
+              if (selectedRole as Role) setRole(selectedRole as Role);
+            }}
+          >
             <option value="STUDENT">Student</option>
             <option value="TEACHER">Teacher</option>
           </RoleSelect>
@@ -27,7 +94,7 @@ function Login({}: Props) {
           </LoginTextWrapper>
           <GitHubIcon />
         </LoginGitHubButton>
-        <NextButton>Next</NextButton>
+        <NextButton onClick={handleRoleSelection}>Next</NextButton>
       </LoginFormContainer>
     </Container>
   );
@@ -94,6 +161,7 @@ const LoginGitHubButton = styled.button`
 const NextButton = styled.button`
   font-size: 1rem;
   padding: 0.4rem 0.8rem;
+  cursor: pointer;
 
   border: none;
   outline: none;
