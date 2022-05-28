@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useContext } from "react";
 import styled from "styled-components";
 import colors from "../theme/colors.json";
 
@@ -11,11 +11,14 @@ import { IoMdNotifications as NotificationIcon } from "react-icons/io";
 
 // router
 import { useNavigate } from "react-router-dom";
+import { UserContext, UserData } from "../provider/UserProvider";
 type Props = {
   children?: ReactNode;
 };
 
 export const LayoutSidebar = ({ children }: Props) => {
+  const { user }: { user: UserData } = useContext(UserContext);
+
   return (
     <Layout>
       <SidebarContainer>
@@ -23,6 +26,9 @@ export const LayoutSidebar = ({ children }: Props) => {
           <LinkButton route="/chat" Icon={ChatIcon} />
           <LinkButton route="/editor" Icon={EditorIcon} />
           <LinkButton route="/notification" Icon={NotificationIcon} />
+          {user && user.photo && (
+            <UserProfile src={user.photo} alt={user.username} />
+          )}
         </IconsContainer>
       </SidebarContainer>
       {children}
@@ -72,4 +78,12 @@ const IconWrapper = styled.button`
   color: ${colors.theme["text-light-muted"]};
   font-size: 1.125rem;
   cursor: pointer;
+`;
+
+const UserProfile = styled.img`
+  height: 1.5rem;
+  width: 1.5rem;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
 `;

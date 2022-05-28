@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { axiosTeamCode } from "../api/hooks";
-import { UserContext } from "../provider/UserProvider";
+import { UserData } from "../provider/UserProvider";
 type Props = {};
 
 type Role = "STUDENT" | "TEACHER";
@@ -62,6 +62,7 @@ function Login({}: Props) {
       if (status === 201) {
         const userData = cookies.user_data;
         setCookie("user_data", { ...userData, role });
+        navigate("/chat");
         console.log("role created success");
       }
     } catch (e) {
