@@ -53,4 +53,17 @@ export class UsersService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
+
+  async updateUserPeerId({ id, peerId }: { id: number; peerId: string }) {
+    const user = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        peerId,
+      },
+    });
+
+    return user;
+  }
 }

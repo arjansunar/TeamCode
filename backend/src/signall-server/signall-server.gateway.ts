@@ -8,6 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { UsersService } from 'src/users';
 
 interface Payload {
   target: string;
@@ -25,6 +26,7 @@ interface RoomParams {
   },
 })
 export class SignallServerGateway implements OnGatewayInit {
+  constructor(private usersService: UsersService) {}
   @WebSocketServer()
   private server: Server;
 
@@ -37,25 +39,25 @@ export class SignallServerGateway implements OnGatewayInit {
     console.log('rooms', this.rooms);
   }
 
+  // should handle updating the user peer id in db as well [to-do]
   @SubscribeMessage('join-room')
   handleJoinRoom(
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
     @MessageBody('peerId') peerId: string,
+    // @MessageBody('userId') userId: number,
   ) {
     // checks if the room id is present. if not it creates the room
     if (!this.rooms[roomId]) this.rooms[roomId] = [];
     if (!this.rooms[roomId].includes(peerId)) {
       this.rooms[roomId].push(peerId);
+
+      // save peer id
+      // await this.usersService.updateUserPeerId({ id: userId, peerId });
       client.join(roomId);
     }
 
     this.server.to(roomId).emit('user-joined', { peerId });
-
-    client.to(roomId).emit('get-users', {
-      roomId,
-      participants: this.rooms[roomId],
-    });
 
     client.on('disconnect', () => {
       // console.log('user left the room');
@@ -64,6 +66,27 @@ export class SignallServerGateway implements OnGatewayInit {
         (el) => el !== peerId && el !== null,
       );
       this.server.to(roomId).emit('user-disconnect', { peerId });
+    });
+  }
+
+  @SubscribeMessage('update-user-peer-id')
+  async handleUpdatingUserPeerId(
+    @MessageBody('roomId') roomId: string,
+    @MessageBody('peerId') peerId: string,
+    @MessageBody('userId') userId: number,
+  ) {
+    const user = await this.usersService.updateUserPeerId({
+      id: userId,
+      peerId,
+    });
+
+    const { username, peerId: myPeerId } = user;
+    console.log({ user });
+
+    this.server.to(roomId).emit('get-users', {
+      roomId,
+      participants: this.rooms[roomId],
+      me: { username, myPeerId },
     });
   }
 }

@@ -18,6 +18,17 @@ import { peersReducer } from "../store/reducer/peerReducer";
 const WS_URL = "http://localhost:5001";
 
 const ws = SocketIoClient(WS_URL);
+
+// add bearer token
+const socketOptions = {
+  transportOptions: {
+    polling: {
+      extraHeaders: {
+        Authorization: "your token", //'Bearer h93t4293t49jt34j9rferek...'
+      },
+    },
+  },
+};
 export const RoomContext = createContext<null | any>(null);
 
 interface Props {
@@ -33,56 +44,65 @@ export const RoomProvider: FC<Props> = ({ children }) => {
   // media stream
   const [audioStream, setAudioStream] = useState<MediaStream>();
 
+  // meeting participants
+  const [participants, setParticipants] = useState<null | any>();
+
   useEffect(() => {
     const userId = uuidV4();
-    const userPeer = new Peer(userId, {
-      host: "localhost",
-      port: 9000,
-      path: "/teamCode",
-    });
+    const userPeer = new Peer(
+      userId
+      //   {
+      //   host: "localhost",
+      //   port: 9000,
+      //   path: "/teamCode",
+      // }
+    );
 
     setMe(userPeer);
 
-    const getUsers = ({ participants }: { participants: [] }) => {
-      console.log({ participants });
-    };
-    ws.on("get-users", getUsers);
-
-    try {
-      navigator.mediaDevices
-        .getUserMedia({ audio: true, video: true })
-        .then((stream) => setAudioStream(stream));
-    } catch (err) {
-      console.error(err);
-    }
+    // getting user media
+    // try {
+    //   navigator.mediaDevices
+    //     .getUserMedia({ audio: true, video: true })
+    //     .then((stream) => setAudioStream(stream));
+    // } catch (err) {
+    //   console.error(err);
+    // }
   }, []);
 
   useEffect(() => {
-    if (!me || !audioStream) return;
-    // initiation
-    ws.on("user-joined", ({ peerId }) => {
-      const call = me.call(peerId, audioStream);
-      if (!call) return;
-      call.on("stream", (peerStream) =>
-        dispatch(addPeerStreamAction(peerId, peerStream))
-      );
-    });
-    // answer
-    me.on("call", (call) => {
-      call.answer(audioStream);
-      call.on("stream", (peerStream) =>
-        dispatch(addPeerStreamAction(call.peer, peerStream))
-      );
-    });
+    const getUsers = ({ participants, me }: { participants: []; me: any }) => {
+      setParticipants({ participants, me });
+    };
+    ws.on("get-users", getUsers);
+  }, [ws]);
 
-    ws.on("user-disconnect", ({ peerId }) => {
-      // console.log("user disconnected ", peerId, peers);
-      dispatch(removePeerStreamAction(peerId));
-    });
-  }, [me, audioStream]);
+  // useEffect(() => {
+  //   if (!me || !audioStream) return;
+  //   // initiation
+  //   ws.on("user-joined", ({ peerId }) => {
+  //     const call = me.call(peerId, audioStream);
+  //     if (!call) return;
+  //     call.on("stream", (peerStream) =>
+  //       dispatch(addPeerStreamAction(peerId, peerStream))
+  //     );
+  //   });
+  //   // answer
+  //   me.on("call", (call) => {
+  //     call.answer(audioStream);
+  //     call.on("stream", (peerStream) =>
+  //       dispatch(addPeerStreamAction(call.peer, peerStream))
+  //     );
+  //   });
+
+  //   ws.on("user-disconnect", ({ peerId }) => {
+  //     // console.log("user disconnected ", peerId, peers);
+  //     dispatch(removePeerStreamAction(peerId));
+  //   });
+  // }, [me, audioStream]);
 
   return (
-    <RoomContext.Provider value={{ ws, me, audioStream, peers }}>
+    <RoomContext.Provider value={{ ws, me, participants }}>
       {children}
     </RoomContext.Provider>
   );

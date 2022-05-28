@@ -25,6 +25,8 @@ model User {
   email       String   @unique
   role        Role     @default(STUDENT)
 
+  peerId      String?  @unique
+
   hashedRt    String?  
   
   @@map("users")
