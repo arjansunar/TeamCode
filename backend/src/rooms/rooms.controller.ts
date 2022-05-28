@@ -20,6 +20,13 @@ export class RoomsController {
     return await this.roomsService.createNewRoom(ownerId);
   }
 
+  @Get('/my-room')
+  @Role(UserRole.TEACHER)
+  @UseGuards(RoleGuard)
+  async getOwnerRoom(@GetUser('id') ownerId: number) {
+    return await this.roomsService.getRoomByOwnerId(ownerId);
+  }
+
   @Get('/room-details/:roomId')
   getRoomDetails(@Param('roomId') roomId: string): Room {
     return this.roomsService.getRoom(roomId);

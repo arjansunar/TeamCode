@@ -9,6 +9,7 @@
     "text-light": "#f6fbfe",
     "text-light-muted": "#c0c2c3",
     "text-dark": "#272a2d",
+    "bg-blue": "rgb(41, 153, 253)",
     "message": {
       "bg-light-blue": "#2999fd",
       "bg-gray": "#26292c"

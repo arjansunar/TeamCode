@@ -11,7 +11,9 @@ import { IoMdNotifications as NotificationIcon } from "react-icons/io";
 
 // router
 import { Link, useNavigate } from "react-router-dom";
+
 import { UserContext, UserData } from "../provider/UserProvider";
+
 type Props = {
   children?: ReactNode;
 };
@@ -38,13 +40,7 @@ export const LayoutSidebar = ({ children }: Props) => {
   );
 };
 
-const LinkButton = ({
-  Icon,
-  route,
-}: {
-  Icon: IconType | ReactElement;
-  route: string;
-}) => {
+const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
   const navigate = useNavigate();
   const changeRoute = () => {
     navigate(route);

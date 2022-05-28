@@ -17,13 +17,31 @@ export class RoomsService {
     const owner = await this.usersService.findUserWithId(ownerId);
 
     if (!owner) return new NotFoundException('Owner not found');
-    const newRoom = this.prismaService.room.create({
+    const room = await this.prismaService.room.findUnique({
+      where: { ownerId },
+    });
+    // if there is previous room with same owner id delete it
+    if (room) {
+      await this.prismaService.room.delete({
+        where: {
+          ownerId,
+        },
+      });
+    }
+    const newRoom = await this.prismaService.room.create({
       data: {
         id: uuidv4(),
         ownerId: owner.id,
       },
     });
     return newRoom;
+  }
+
+  async getRoomByOwnerId(ownerId: number) {
+    const room = await this.prismaService.room.findUnique({
+      where: { ownerId },
+    });
+    return room;
   }
 
   getRoom(roomId: string): Room {
