@@ -13,8 +13,6 @@ import Room from "./pages/testchat/Room";
 import { LayoutSidebar } from "./layout";
 import Notification from "./pages/Notification";
 import Error from "./pages/Error";
-import { useCookies } from "react-cookie";
-import { axiosTeamCode } from "./api/hooks";
 import Meeting from "./pages/Meeting";
 import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
 

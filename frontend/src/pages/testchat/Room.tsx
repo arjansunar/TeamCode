@@ -39,28 +39,39 @@ const Messages = () => {
   const { me }: { me: Peer } = useContext(RoomContext);
   const [to, setTo] = useState<string>("");
   const [message, setMessage] = useState("");
-  const [condata, setcondata] = useState();
   const [messages, setMessages] = useState<string[]>([]);
 
-  let dataConnection: DataConnection;
+  const [myDataConnection, setMyDataConnection] = useState<DataConnection>();
+  const [otherDataConnection, setOtherDataConnection] =
+    useState<DataConnection>();
   const connect = () => {
-    dataConnection = me.connect(to);
-    console.log({ dataConnection });
+    setMyDataConnection(me.connect(to));
   };
   const sendMessage = () => {
-    me.connect(to);
     // sending message
-    dataConnection.send(message);
+    if (myDataConnection) {
+      myDataConnection.send(message);
+      setMessages((messages) => [...messages, message]);
+    } else {
+      console.log("no connection");
+    }
   };
 
   useEffect(() => {
-    if (dataConnection)
-      dataConnection.on("data", (data) => {
-        setcondata(data);
-      });
-  });
+    if (!me) return;
+    me.on("connection", (dataConnection) => {
+      setOtherDataConnection(dataConnection);
+    });
+  }, [me]);
 
-  console.log({ message });
+  useEffect(() => {
+    if (!otherDataConnection) return;
+    otherDataConnection.on("data", (data) => {
+      setMessages((messages) => [...messages, data]);
+    });
+  }, [otherDataConnection]);
+
+  console.log({ message, dataConnection: myDataConnection });
   return (
     <DebugText>
       <label>call </label>
@@ -74,25 +85,30 @@ const Messages = () => {
       <button onClick={connect}>connect</button>
       <button onClick={sendMessage}>Send</button>
 
-      {condata && (
+      {messages.length > 0 && (
         <div className="div">
           <h2>messages</h2>
-          <pre>{JSON.stringify(condata, null, 2)}</pre>
+          <pre>{JSON.stringify(messages, null, 2)}</pre>
         </div>
       )}
     </DebugText>
   );
 };
 const ShowPeersDetails = () => {
-  const { participants } = useContext(RoomContext);
+  const { participants, me } = useContext(RoomContext);
 
   return (
     <div>
       {!participants ? (
         <div>No participants</div>
       ) : (
-        <div>
-          <pre>{JSON.stringify(participants, null, 2)}</pre>
+        <div className="">
+          <div>
+            <pre>{me.id}</pre>
+          </div>
+          <div>
+            <pre>{JSON.stringify(participants, null, 2)}</pre>
+          </div>
         </div>
       )}
     </div>
