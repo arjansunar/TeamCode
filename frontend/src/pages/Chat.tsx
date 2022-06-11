@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 import ChatBox from "../components/chat/ChatBox";
 import ChatUsers from "../components/chat/ChatUsers";

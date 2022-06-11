@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import { useContext, useState } from "react";
 import styled, { css } from "styled-components";
 import colors from "../../theme/colors.json";
 
 import { RiSendPlaneFill as SendButton } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
+import { getSelectedParticipant } from "../../store/features/selectedParticipant";
+import {
+  getMyConnection,
+  Participant,
+  setMyDataConnection,
+} from "../../store/features/participants";
+import { MeetingContext } from "../../common/meetingDetails";
 
 type Props = {};
 
@@ -32,11 +40,41 @@ const ChatBox = (props: Props) => {
 
   const [userMessage, setUserMessage] = useState<string>("");
   console.log({ messages });
+
+  const selectedUser = useSelector(getSelectedParticipant);
+
+  if (Object.keys(selectedUser).length < 1)
+    return <div style={{ color: "red" }}>select a user</div>;
+
+  // my peer instance
+  const { me } = useContext(MeetingContext);
+
+  // redux
+  const dispatch = useDispatch();
+
+  const createConnection = () => {
+    const { id, peerId } = selectedUser;
+
+    // create connection
+    // const dataCon = me.connect(peerId);
+    // // save connection
+    // dispatch(setMyDataConnection({ participantId: id, connection: dataCon }));
+  };
+
+  const handleSendMessage = () => {
+    setMessages([...messages, { id: user.id, message: userMessage }]);
+    setUserMessage("");
+    // check if connection exists
+    const { id } = selectedUser;
+    const myCon = useSelector((state) => getMyConnection(state, id));
+    // if no connection then create one
+    // if (!myCon) createConnection();
+  };
   return (
     <Container>
       <Header>
-        <Img src="https://avatars.githubusercontent.com/u/55166361?v=4" />
-        <Name>Aakanshya Gahatraj</Name>
+        <Img src={selectedUser.photo} />
+        <Name>{selectedUser.username}</Name>
       </Header>
       <Body>
         {!!messages ? (
@@ -57,12 +95,7 @@ const ChatBox = (props: Props) => {
             value={userMessage}
             onChange={(val) => setUserMessage(val.target.value)}
           />
-          <MessageButton
-            onClick={() => {
-              setMessages([...messages, { id: user.id, message: userMessage }]);
-              setUserMessage("");
-            }}
-          >
+          <MessageButton onClick={handleSendMessage}>
             <SendButton />
           </MessageButton>
         </MessageForm>

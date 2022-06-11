@@ -1,4 +1,11 @@
-import { FC, ReactElement, ReactNode, useEffect, useState } from "react";
+import {
+  FC,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import colors from "./theme/colors.json";
@@ -15,6 +22,9 @@ import Notification from "./pages/Notification";
 import Error from "./pages/Error";
 import Meeting from "./pages/Meeting";
 import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
+import { useDispatch, useSelector } from "react-redux";
+import { addParticipants } from "./store/features/participants";
+import { MeetingContext } from "./common/meetingDetails";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -52,9 +62,9 @@ body {
 }
 }
 `;
-function App() {
-  const Home = () => <div>home</div>;
 
+const Home = () => <div>Home</div>;
+function App() {
   return (
     <div className="App">
       <GlobalStyleWithReset />

@@ -10,7 +10,6 @@ export const ProtectedRoutes = () => {
   if (!!token && String(token).length > 0) {
     isAuth = true;
   }
-  console.log({ token, isAuth });
 
   return isAuth ? <Outlet /> : <Navigate to="/login" />;
 };

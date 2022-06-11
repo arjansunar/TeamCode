@@ -2,6 +2,7 @@ import {
   createContext,
   FC,
   ReactNode,
+  useContext,
   useEffect,
   useReducer,
   useState,
@@ -14,12 +15,9 @@ import {
 } from "../store/actions/peerActions";
 import Peer from "peerjs";
 import { peersReducer } from "../store/reducer/peerReducer";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addParticipants } from "../store/features/participants";
-
-const WS_URL = "http://localhost:5001";
-
-const ws = SocketIoClient(WS_URL);
+import { MeetingContext } from "../common/meetingDetails";
 
 // add bearer token
 const socketOptions = {
@@ -38,8 +36,8 @@ interface Props {
 }
 export const RoomProvider: FC<Props> = ({ children }) => {
   // reference to the user peer "me"
-  const [me, setMe] = useState<null | Peer>();
 
+  const { me, ws } = useContext(MeetingContext);
   // reducers for working with peer
   const [peers, dispatch] = useReducer(peersReducer, {});
 
@@ -52,43 +50,42 @@ export const RoomProvider: FC<Props> = ({ children }) => {
   // redux wrapper
   const reduxDispatch = useDispatch();
 
-  useEffect(() => {
-    const userId = uuidV4();
-    const userPeer = new Peer(
-      userId
-      //   {
-      //   host: "localhost",
-      //   port: 9000,
-      //   path: "/teamCode",
-      // }
-    );
+  // useEffect(() => {
+  //   const userId = uuidV4();
+  //   const userPeer = new Peer(
+  //     userId
+  //     //   {
+  //     //   host: "localhost",
+  //     //   port: 9000,
+  //     //   path: "/teamCode",
+  //     // }
+  //   );
 
-    setMe(userPeer);
+  //   setMe(userPeer);
 
-    // getting user media
-    // try {
-    //   navigator.mediaDevices
-    //     .getUserMedia({ audio: true, video: true })
-    //     .then((stream) => setAudioStream(stream));
-    // } catch (err) {
-    //   console.error(err);
-    // }
-  }, []);
+  //   // getting user media
+  //   // try {
+  //   //   navigator.mediaDevices
+  //   //     .getUserMedia({ audio: true, video: true })
+  //   //     .then((stream) => setAudioStream(stream));
+  //   // } catch (err) {
+  //   //   console.error(err);
+  //   // }
+  // }, []);
 
-  useEffect(() => {
-    const getUsers = ({
-      participants,
-      me,
-    }: {
-      participants: { participants: [] };
-      me: any;
-    }) => {
-      reduxDispatch(addParticipants(participants));
-      setParticipants({ participants, me });
-      console.log({ participants });
-    };
-    ws.on("get-users", getUsers);
-  }, [ws]);
+  // useEffect(() => {
+  //   const getUsers = ({
+  //     participants,
+  //     me,
+  //   }: {
+  //     participants: { participants: [] };
+  //     me: any;
+  //   }) => {
+  //     setParticipants({ participants, me });
+  //     console.log({ participants });
+  //   };
+  //   ws.on("get-users", getUsers);
+  // }, [ws]);
 
   // useEffect(() => {
   //   if (!me || !audioStream) return;

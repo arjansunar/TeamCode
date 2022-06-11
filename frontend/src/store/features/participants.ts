@@ -28,12 +28,49 @@ export const participantsSlice = createSlice({
       const participants: Participant[] = action.payload;
       state.participants = participants;
     },
+
+    setMyDataConnection: (
+      state,
+      action: {
+        payload: { participantId: number; connection: DataConnection };
+        type: string;
+      }
+    ) => {
+      const { participantId, connection } = action.payload;
+      const getParticipantId = state.participants.findIndex(
+        (el) => el.id === participantId
+      );
+      if (getParticipantId < 0) return;
+      state.participants[getParticipantId].myDataConnection = connection;
+
+      state.participants = [...state.participants];
+    },
+
+    setOtherDataConnection: (
+      state,
+      action: {
+        payload: { participantId: number; connection: DataConnection };
+        type: string;
+      }
+    ) => {
+      const { participantId, connection } = action.payload;
+      const getParticipantId = state.participants.findIndex(
+        (el) => el.id === participantId
+      );
+      if (getParticipantId < 0) return;
+      state.participants[getParticipantId].otherDataConnection = connection;
+      state.participants = [...state.participants];
+    },
   },
 });
 
-export const { addParticipants } = participantsSlice.actions;
+export const { addParticipants, setMyDataConnection, setOtherDataConnection } =
+  participantsSlice.actions;
 export const participantsReducer = participantsSlice.reducer;
 
 // selectors
 export const getParticipants = (state: { participants: typeof initialState }) =>
   state.participants.participants;
+
+export const getMyConnection = (state: any, id: number) =>
+  state.participants.participants.find((el: Participant) => el.id === id);

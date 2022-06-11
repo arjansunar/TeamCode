@@ -4,7 +4,10 @@ import colors from "../../theme/colors.json";
 
 import { BsSearch as SearchIcon } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { getParticipants } from "../../store/features/participants";
+import {
+  getParticipants,
+  Participant,
+} from "../../store/features/participants";
 import { setSelected } from "../../store/features/selectedParticipant";
 
 type Props = {};
@@ -28,9 +31,9 @@ const ChatUsers = (props: Props) => {
   };
   console.log({ searchUser });
 
-  const setSelectedParticipant = (id: number) => {
-    if (typeof id !== "number") return;
-    reduxDispatch(setSelected(id));
+  const setSelectedParticipant = (user: Participant) => {
+    if (typeof user !== "object") return;
+    reduxDispatch(setSelected(user));
   };
   return (
     <Container>
@@ -49,7 +52,7 @@ const ChatUsers = (props: Props) => {
           participants.map((el) => (
             <UserContainer
               key={el.id}
-              onClick={() => setSelectedParticipant(el.id)}
+              onClick={() => setSelectedParticipant(el)}
             >
               <UserImage src={el.photo} />
               <UserName>{el.username}</UserName>

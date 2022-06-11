@@ -1,14 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { Participant } from "./participants";
 
 const initialState = {
-  selected: null as null | number,
+  selected: {} as Participant,
 };
 
 export const selectedParticipantSlice = createSlice({
   name: "selected",
   initialState,
   reducers: {
-    setSelected(state, action: { payload: number; type: string }) {
+    setSelected(state, action: { payload: Participant; type: string }) {
       state.selected = action.payload;
     },
   },

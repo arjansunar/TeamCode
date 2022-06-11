@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -63,6 +63,7 @@ export class UsersService {
   }
 
   async updateUserPeerId({ id, peerId }: { id: number; peerId: string }) {
+    if (!id && !peerId) throw new BadRequestException('User id or peer id');
     const user = await this.prisma.user.update({
       where: {
         id,

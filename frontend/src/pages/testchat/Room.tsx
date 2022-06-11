@@ -8,6 +8,12 @@ import Peer, { DataConnection } from "peerjs";
 // router params
 import { useParams } from "react-router-dom";
 import { UserContext, UserData } from "../../provider/UserProvider";
+import { useSelector } from "react-redux";
+import {
+  getMyConnection,
+  getParticipants,
+} from "../../store/features/participants";
+import { MeetingContext } from "../../common/meetingDetails";
 
 type Props = {
   roomId: string;
@@ -36,7 +42,7 @@ const Room = () => {
 };
 
 const Messages = () => {
-  const { me }: { me: Peer } = useContext(RoomContext);
+  const { me }: { me: Peer } = useContext(MeetingContext);
   const [to, setTo] = useState<string>("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
@@ -71,7 +77,7 @@ const Messages = () => {
     });
   }, [otherDataConnection]);
 
-  console.log({ message, dataConnection: myDataConnection });
+  // console.log({ message, dataConnection: myDataConnection });
   return (
     <DebugText>
       <label>call </label>
@@ -95,17 +101,13 @@ const Messages = () => {
   );
 };
 const ShowPeersDetails = () => {
-  const { participants, me } = useContext(RoomContext);
-
+  const participants = useSelector(getParticipants);
   return (
     <div>
       {!participants ? (
         <div>No participants</div>
       ) : (
         <div className="">
-          <div>
-            <pre>{me.id}</pre>
-          </div>
           <div>
             <pre>{JSON.stringify(participants, null, 2)}</pre>
           </div>
@@ -143,22 +145,49 @@ const VideoWrapper = () => {
 };
 
 const JoinMeeting = () => {
-  const { ws, me }: { ws: Socket; me: any } = useContext(RoomContext);
   const { user }: { user: UserData } = useContext(UserContext);
+
+  const { me, ws } = useContext(MeetingContext);
+
   const [roomId, setRoomId] = useState("");
+
+  const room = "98831f68-9147-483c-aa77-737b3cbebcc9";
+
   const clickHandler = () => {
-    if (!me) {
+    if (!Object.keys(me).includes("_id")) {
       console.log("no peer created yet!!");
       return;
     }
     if (roomId.length < 1) return;
-    ws.emit("join-room", { roomId, peerId: me._id });
+    // @ts-ignore
+    ws.emit("join-room", { room, peerId: me._id });
     ws.emit("update-user-peer-id", {
+      // @ts-ignore
       peerId: me._id,
       userId: user.id,
-      roomId: roomId,
+      roomId: room,
     });
   };
+
+  const joinDefaultRoom = () => {
+    if (!me) return;
+
+    // if (!Object.keys(me).includes("_id")) {
+    //   console.log("no peer created yet!!");
+    //   return;
+    // }
+    // @ts-ignore
+    ws.emit("join-room", { roomId: room, peerId: me._id });
+    ws.emit("update-user-peer-id", {
+      // @ts-ignore
+      peerId: me._id,
+      userId: user.id,
+      roomId: room,
+    });
+  };
+
+  useEffect(joinDefaultRoom, [me, ws]);
+
   return (
     <DebugText className="">
       <input

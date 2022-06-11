@@ -36,7 +36,6 @@ export class SignallServerGateway implements OnGatewayInit {
 
   afterInit(server: any) {
     this.logger.log('Initialized');
-    console.log('rooms', this.rooms);
   }
 
   // should handle updating the user peer id in db as well [to-do]
@@ -58,7 +57,6 @@ export class SignallServerGateway implements OnGatewayInit {
     }
 
     this.server.to(roomId).emit('user-joined', { peerId });
-    console.log(this.rooms[roomId]);
 
     client.on('disconnect', () => {
       // console.log('user left the room');
@@ -76,6 +74,7 @@ export class SignallServerGateway implements OnGatewayInit {
     @MessageBody('peerId') peerId: string,
     @MessageBody('userId') userId: number,
   ) {
+    console.log('here');
     const user = await this.usersService.updateUserPeerId({
       id: userId,
       peerId,
@@ -83,11 +82,14 @@ export class SignallServerGateway implements OnGatewayInit {
 
     const { username, peerId: myPeerId } = user;
 
+    console.log({ username, myPeerId, roomId });
+
     const participants = await Promise.all(
       this.rooms[roomId].map(
         async (id) => await this.usersService.findUserWithPeerId(id),
       ),
     );
+    console.log({ participants });
     this.server.to(roomId).emit('get-users', {
       roomId,
       participants: participants,
