@@ -49,15 +49,18 @@ const ChatUsers = (props: Props) => {
       </SearchWrapper>
       <UsersContainer>
         {!!participants ? (
-          participants.map((el) => (
-            <UserContainer
-              key={el.id}
-              onClick={() => setSelectedParticipant(el)}
-            >
-              <UserImage src={el.photo} />
-              <UserName>{el.username}</UserName>
-            </UserContainer>
-          ))
+          participants.map((el) => {
+            if (el)
+              return (
+                <UserContainer
+                  key={el.id}
+                  onClick={() => setSelectedParticipant(el)}
+                >
+                  <UserImage src={el.photo} />
+                  <UserName>{el.username}</UserName>
+                </UserContainer>
+              );
+          })
         ) : (
           <h4>No users joined </h4>
         )}

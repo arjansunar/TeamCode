@@ -12,7 +12,7 @@ import {
   setOtherDataConnection,
 } from "../../store/features/participants";
 import { MeetingContext } from "../../common/meetingDetails";
-import Peer from "peerjs";
+import Peer, { DataConnection } from "peerjs";
 import { UserContext, UserData } from "../../provider/UserProvider";
 
 type Props = {};
@@ -30,10 +30,15 @@ const ChatBox = (props: Props) => {
 
   // selectors
   const selectedUser = useSelector(getSelectedParticipant);
-  const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
-  const otherUserCon = useSelector((state) =>
-    getOtherConnection(state, selectedUser.id)
-  );
+  // const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
+  // const otherUserCon = useSelector((state) =>
+  //   getOtherConnection(state, selectedUser.id)
+  // );
+
+  // local connection instances
+  const [myDataConnection, setMyDataConnection] = useState<DataConnection>();
+  const [otherDataConnection, setOtherDataConnection] =
+    useState<DataConnection>();
 
   // my peer instance
   const { me }: { me: Peer } = useContext(MeetingContext);
@@ -43,63 +48,50 @@ const ChatBox = (props: Props) => {
   const dispatch = useDispatch();
 
   const createConnection = () => {
-    const { peerId, id } = selectedUser;
+    const { peerId } = selectedUser;
     // create connection
     const dataCon = me.connect(peerId);
-    console.log({ dataCon });
     // // save connection
-    dispatch(
-      setMyDataConnection({
-        participantId: id,
-        connection: dataCon,
-      })
-    );
+    setMyDataConnection(dataCon);
   };
 
-  const handleSendMessage = useCallback(() => {
+  const handleSendMessage = () => {
     if (!me) return;
-    if (!myCon) {
+    if (!myDataConnection) {
       createConnection();
       return;
     }
 
-    myCon?.send({ id: user.id, message: userMessage });
-    setMessages([...messages, { id: user.id, message: userMessage }]);
+    myDataConnection?.send({ id: user.id, message: userMessage });
+    setMessages((messages) => [
+      ...messages,
+      { id: user.id, message: userMessage },
+    ]);
     setUserMessage("");
-  }, [me, myCon]);
+  };
 
   useEffect(() => {
-    if (selectedUser) createConnection();
+    createConnection();
   }, []);
 
   // setting other user connection object
   useEffect(() => {
-    if (!myCon) return;
-    const { id } = selectedUser;
+    if (!myDataConnection) return;
 
-    myCon.on("connection", (dataConnection) => {
-      dispatch(
-        setOtherDataConnection({
-          participantId: id,
-          connection: dataConnection,
-        })
-      );
+    myDataConnection.on("connection", (dataConnection) => {
+      setOtherDataConnection(dataConnection);
     });
-  }, [myCon]);
+  }, [myDataConnection]);
   // setting messages on receiver end
   useEffect(() => {
-    if (!otherUserCon) return;
+    if (!otherDataConnection) return;
 
-    otherUserCon.on("data", (data) => {
+    otherDataConnection.on("data", (data) => {
       console.log("data found", data);
       setMessages((messages) => [...messages, data]);
     });
-  }, [otherUserCon]);
+  }, [otherDataConnection]);
 
-  console.log({ id: selectedUser.id, myCon });
-
-  if (Object.keys(selectedUser).length < 1)
-    return <div style={{ color: "red" }}>select a user</div>;
   return (
     <Container>
       <Header>
