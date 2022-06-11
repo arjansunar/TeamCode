@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
 import colors from "../../theme/colors.json";
 
@@ -7,69 +7,99 @@ import { useDispatch, useSelector } from "react-redux";
 import { getSelectedParticipant } from "../../store/features/selectedParticipant";
 import {
   getMyConnection,
-  Participant,
+  getOtherConnection,
   setMyDataConnection,
+  setOtherDataConnection,
 } from "../../store/features/participants";
 import { MeetingContext } from "../../common/meetingDetails";
+import Peer from "peerjs";
+import { UserContext, UserData } from "../../provider/UserProvider";
 
 type Props = {};
-
-const user = {
-  id: 1,
-  name: "Arjan Sunar",
-  photo: "https://avatars.githubusercontent.com/u/55121485?v=4",
-};
-const MESSAGES = [
-  {
-    id: 1,
-    message: "hello",
-  },
-  {
-    id: 2,
-    message: "hi back",
-  },
-];
 
 type Message = {
   id: number;
   message: string;
 };
+const MESSAGES = [] as Message[];
 
 const ChatBox = (props: Props) => {
   const [messages, setMessages] = useState<Message[]>(MESSAGES);
 
   const [userMessage, setUserMessage] = useState<string>("");
-  console.log({ messages });
 
+  // selectors
   const selectedUser = useSelector(getSelectedParticipant);
-
-  if (Object.keys(selectedUser).length < 1)
-    return <div style={{ color: "red" }}>select a user</div>;
+  const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
+  const otherUserCon = useSelector((state) =>
+    getOtherConnection(state, selectedUser.id)
+  );
 
   // my peer instance
-  const { me } = useContext(MeetingContext);
+  const { me }: { me: Peer } = useContext(MeetingContext);
+  const { user }: { user: UserData } = useContext(UserContext);
 
   // redux
   const dispatch = useDispatch();
 
   const createConnection = () => {
-    const { id, peerId } = selectedUser;
-
+    const { peerId, id } = selectedUser;
     // create connection
-    // const dataCon = me.connect(peerId);
+    const dataCon = me.connect(peerId);
+    console.log({ dataCon });
     // // save connection
-    // dispatch(setMyDataConnection({ participantId: id, connection: dataCon }));
+    dispatch(
+      setMyDataConnection({
+        participantId: id,
+        connection: dataCon,
+      })
+    );
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
+    if (!me) return;
+    if (!myCon) {
+      createConnection();
+      return;
+    }
+
+    myCon?.send({ id: user.id, message: userMessage });
     setMessages([...messages, { id: user.id, message: userMessage }]);
     setUserMessage("");
-    // check if connection exists
+  }, [me, myCon]);
+
+  useEffect(() => {
+    if (selectedUser) createConnection();
+  }, []);
+
+  // setting other user connection object
+  useEffect(() => {
+    if (!myCon) return;
     const { id } = selectedUser;
-    const myCon = useSelector((state) => getMyConnection(state, id));
-    // if no connection then create one
-    // if (!myCon) createConnection();
-  };
+
+    myCon.on("connection", (dataConnection) => {
+      dispatch(
+        setOtherDataConnection({
+          participantId: id,
+          connection: dataConnection,
+        })
+      );
+    });
+  }, [myCon]);
+  // setting messages on receiver end
+  useEffect(() => {
+    if (!otherUserCon) return;
+
+    otherUserCon.on("data", (data) => {
+      console.log("data found", data);
+      setMessages((messages) => [...messages, data]);
+    });
+  }, [otherUserCon]);
+
+  console.log({ id: selectedUser.id, myCon });
+
+  if (Object.keys(selectedUser).length < 1)
+    return <div style={{ color: "red" }}>select a user</div>;
   return (
     <Container>
       <Header>
@@ -187,6 +217,7 @@ const MessageInput = styled.input`
   border-radius: 0.5rem;
 `;
 const MessageButton = styled.button`
+  cursor: pointer;
   color: ${colors.theme["text-light"]};
   background-color: transparent;
   border: none;

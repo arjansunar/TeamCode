@@ -72,5 +72,16 @@ export const participantsReducer = participantsSlice.reducer;
 export const getParticipants = (state: { participants: typeof initialState }) =>
   state.participants.participants;
 
-export const getMyConnection = (state: any, id: number) =>
-  state.participants.participants.find((el: Participant) => el.id === id);
+export const getMyConnection = (state: any, id: number) => {
+  const participant: Participant = state.participants.participants.find(
+    (el: Participant) => el.id === id
+  );
+  return participant?.myDataConnection;
+};
+
+export const getOtherConnection = (state: any, id: number) => {
+  const participant: Participant = state.participants.participants.find(
+    (el: Participant) => el.id === id
+  );
+  return participant?.otherDataConnection;
+};

@@ -1,6 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { appMessagesReducer } from "./features/appMessages";
-import { participantsReducer } from "./features/participants";
+import {
+  participantsReducer,
+  setMyDataConnection,
+} from "./features/participants";
 import { selectedParticipantReducer } from "./features/selectedParticipant";
 
 export const store = configureStore({
@@ -9,4 +12,11 @@ export const store = configureStore({
     participants: participantsReducer,
     selectedParticipant: selectedParticipantReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types
+        ignoredActions: ["participants/setMyDataConnection"],
+      },
+    }),
 });
