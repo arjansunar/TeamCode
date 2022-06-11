@@ -8,12 +8,18 @@ import { BrowserRouter } from "react-router-dom";
 import { CookiesProvider } from "react-cookie";
 import { UserProvider } from "./provider/UserProvider";
 
+// redux
+import { store } from "./store/store";
+import { Provider as ReduxProvider } from "react-redux";
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <CookiesProvider>
         <UserProvider>
-          <App />
+          <ReduxProvider store={store}>
+            <App />
+          </ReduxProvider>
         </UserProvider>
       </CookiesProvider>
     </BrowserRouter>

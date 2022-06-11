@@ -14,6 +14,8 @@ import {
 } from "../store/actions/peerActions";
 import Peer from "peerjs";
 import { peersReducer } from "../store/reducer/peerReducer";
+import { useDispatch } from "react-redux";
+import { addParticipants } from "../store/features/participants";
 
 const WS_URL = "http://localhost:5001";
 
@@ -47,6 +49,9 @@ export const RoomProvider: FC<Props> = ({ children }) => {
   // meeting participants
   const [participants, setParticipants] = useState<null | any>();
 
+  // redux wrapper
+  const reduxDispatch = useDispatch();
+
   useEffect(() => {
     const userId = uuidV4();
     const userPeer = new Peer(
@@ -71,8 +76,16 @@ export const RoomProvider: FC<Props> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const getUsers = ({ participants, me }: { participants: []; me: any }) => {
+    const getUsers = ({
+      participants,
+      me,
+    }: {
+      participants: { participants: [] };
+      me: any;
+    }) => {
+      reduxDispatch(addParticipants(participants));
       setParticipants({ participants, me });
+      console.log({ participants });
     };
     ws.on("get-users", getUsers);
   }, [ws]);

@@ -3,77 +3,35 @@ import styled from "styled-components";
 import colors from "../../theme/colors.json";
 
 import { BsSearch as SearchIcon } from "react-icons/bs";
+import { useDispatch, useSelector } from "react-redux";
+import { getParticipants } from "../../store/features/participants";
+import { setSelected } from "../../store/features/selectedParticipant";
 
 type Props = {};
 
-const users = [
-  {
-    name: "Arjan Sunar",
-    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
-  },
-  {
-    name: "Aaka Sunar",
-    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
-  },
-  {
-    name: "Daaka Sunar",
-    image:
-      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-  },
-  {
-    name: "Arjan Sunar",
-    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
-  },
-  {
-    name: "Aaka Sunar",
-    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
-  },
-  {
-    name: "Daaka Sunar",
-    image:
-      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-  },
-  {
-    name: "Arjan Sunar",
-    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
-  },
-  {
-    name: "Aaka Sunar",
-    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
-  },
-  {
-    name: "Daaka Sunar",
-    image:
-      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-  },
-  {
-    name: "Arjan Sunar",
-    image: "https://avatars.githubusercontent.com/u/55121485?v=4",
-  },
-  {
-    name: "Aaka Sunar",
-    image: "https://avatars.githubusercontent.com/u/55166361?v=4",
-  },
-  {
-    name: "Daaka Sunar",
-    image:
-      "https://images.unsplash.com/photo-1474978528675-4a50a4508dc3?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-  },
-];
-
 const ChatUsers = (props: Props) => {
   const [searchUser, setSearchUser] = useState("");
+  const participants = useSelector(getParticipants);
+
+  // redux
+  const reduxDispatch = useDispatch();
   const handleSearchChange = (val: ChangeEvent) => {
     // @ts-ignore
     const searchText = val.target.value;
     if (!searchText) return;
     setSearchUser(searchText);
   };
+  console.log({ participants });
 
   const handleSearchSubmit = () => {
     console.log({ searchUser });
   };
   console.log({ searchUser });
+
+  const setSelectedParticipant = (id: number) => {
+    if (typeof id !== "number") return;
+    reduxDispatch(setSelected(id));
+  };
   return (
     <Container>
       <SearchWrapper onSubmit={(e) => e.preventDefault()}>
@@ -87,11 +45,14 @@ const ChatUsers = (props: Props) => {
         </SearchButton>
       </SearchWrapper>
       <UsersContainer>
-        {!!users ? (
-          users?.map((el, i) => (
-            <UserContainer key={i + el.name}>
-              <UserImage src={el.image} />
-              <UserName>{el.name}</UserName>
+        {!!participants ? (
+          participants.map((el) => (
+            <UserContainer
+              key={el.id}
+              onClick={() => setSelectedParticipant(el.id)}
+            >
+              <UserImage src={el.photo} />
+              <UserName>{el.username}</UserName>
             </UserContainer>
           ))
         ) : (
@@ -163,6 +124,7 @@ const UserName = styled.h4`
 `;
 
 const UserContainer = styled.div`
+  cursor: pointer;
   display: flex;
   gap: 2rem;
   width: 100%;

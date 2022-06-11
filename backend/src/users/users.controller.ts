@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Role as UserRole } from '@prisma/client';
-import { Request } from 'express';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { UserLoggedGuard } from 'src/auth/guard/user-loggin.guard';
 import { ParsedJWTToken } from 'src/auth/types';

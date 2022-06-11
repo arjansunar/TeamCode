@@ -58,6 +58,7 @@ export class SignallServerGateway implements OnGatewayInit {
     }
 
     this.server.to(roomId).emit('user-joined', { peerId });
+    console.log(this.rooms[roomId]);
 
     client.on('disconnect', () => {
       // console.log('user left the room');
@@ -81,11 +82,15 @@ export class SignallServerGateway implements OnGatewayInit {
     });
 
     const { username, peerId: myPeerId } = user;
-    console.log({ user });
 
+    const participants = await Promise.all(
+      this.rooms[roomId].map(
+        async (id) => await this.usersService.findUserWithPeerId(id),
+      ),
+    );
     this.server.to(roomId).emit('get-users', {
       roomId,
-      participants: this.rooms[roomId],
+      participants: participants,
       me: { username, myPeerId },
     });
   }

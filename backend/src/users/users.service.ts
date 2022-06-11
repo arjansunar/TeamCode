@@ -24,6 +24,14 @@ export class UsersService {
     });
   }
 
+  async findUserWithPeerId(peerId: string) {
+    return await this.prisma.user.findUnique({
+      where: {
+        peerId,
+      },
+    });
+  }
+
   // updates user hashed refresh tokens
   async updateUserHashRt(id: number, hashRt: string) {
     return this.prisma.user.update({

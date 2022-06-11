@@ -143,14 +143,15 @@ const VideoWrapper = () => {
 };
 
 const JoinMeeting = () => {
-  const roomId = "fc2829a2-0993-43a4-b345-f09997e3c658";
   const { ws, me }: { ws: Socket; me: any } = useContext(RoomContext);
   const { user }: { user: UserData } = useContext(UserContext);
+  const [roomId, setRoomId] = useState("");
   const clickHandler = () => {
     if (!me) {
       console.log("no peer created yet!!");
       return;
     }
+    if (roomId.length < 1) return;
     ws.emit("join-room", { roomId, peerId: me._id });
     ws.emit("update-user-peer-id", {
       peerId: me._id,
@@ -160,6 +161,11 @@ const JoinMeeting = () => {
   };
   return (
     <DebugText className="">
+      <input
+        type="text"
+        placeholder="room id"
+        onChange={(e) => setRoomId(e.target.value)}
+      />
       <button onClick={clickHandler}>join</button>
       <br />
     </DebugText>
