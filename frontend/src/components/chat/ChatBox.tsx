@@ -74,14 +74,17 @@ const ChatBox = (props: Props) => {
     createConnection();
   }, []);
 
+  console.log({ myDataConnection, otherDataConnection });
+
   // setting other user connection object
   useEffect(() => {
-    if (!myDataConnection) return;
+    if (!me) return;
 
-    myDataConnection.on("connection", (dataConnection) => {
+    me.on("connection", (dataConnection) => {
+      console.log("another data connection ");
       setOtherDataConnection(dataConnection);
     });
-  }, [myDataConnection]);
+  }, [me]);
   // setting messages on receiver end
   useEffect(() => {
     if (!otherDataConnection) return;

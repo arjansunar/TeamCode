@@ -14,6 +14,7 @@ import {
   getParticipants,
 } from "../../store/features/participants";
 import { MeetingContext } from "../../common/meetingDetails";
+import { useCookies } from "react-cookie";
 
 type Props = {
   roomId: string;
@@ -43,6 +44,7 @@ const Room = () => {
 
 const Messages = () => {
   const { me }: { me: Peer } = useContext(MeetingContext);
+  const { user }: { user: UserData } = useContext(UserContext);
   const [to, setTo] = useState<string>("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<string[]>([]);
@@ -56,7 +58,7 @@ const Messages = () => {
   const sendMessage = () => {
     // sending message
     if (myDataConnection) {
-      myDataConnection.send(message);
+      myDataConnection.send({ id: user.id, message: message });
       setMessages((messages) => [...messages, message]);
     } else {
       console.log("no connection");
@@ -76,6 +78,8 @@ const Messages = () => {
       setMessages((messages) => [...messages, data]);
     });
   }, [otherDataConnection]);
+
+  console.log(myDataConnection?.connectionId);
 
   // console.log({ message, dataConnection: myDataConnection });
   return (
@@ -146,6 +150,7 @@ const VideoWrapper = () => {
 
 const JoinMeeting = () => {
   const { user }: { user: UserData } = useContext(UserContext);
+  // const [cookie, setCookie] = useCookies(["meeting-joined"]);
 
   const { me, ws } = useContext(MeetingContext);
 
@@ -171,6 +176,13 @@ const JoinMeeting = () => {
 
   const joinDefaultRoom = () => {
     if (!me) return;
+
+    // if (cookie["meeting-joined"]) {
+    //   console.log("meeting already joined");
+    //   return;
+    // }
+
+    // setCookie("meeting-joined", true);
 
     // if (!Object.keys(me).includes("_id")) {
     //   console.log("no peer created yet!!");

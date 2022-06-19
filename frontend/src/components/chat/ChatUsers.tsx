@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
 import styled from "styled-components";
 import colors from "../../theme/colors.json";
 
@@ -9,6 +9,7 @@ import {
   Participant,
 } from "../../store/features/participants";
 import { setSelected } from "../../store/features/selectedParticipant";
+import { UserContext, UserData } from "../../provider/UserProvider";
 
 type Props = {};
 
@@ -24,12 +25,14 @@ const ChatUsers = (props: Props) => {
     if (!searchText) return;
     setSearchUser(searchText);
   };
-  console.log({ participants });
+  // console.log({ participants });
 
   const handleSearchSubmit = () => {
-    console.log({ searchUser });
+    // console.log({ searchUser });
   };
-  console.log({ searchUser });
+  // console.log({ searchUser });
+
+  const { user }: { user: UserData } = useContext(UserContext);
 
   const setSelectedParticipant = (user: Participant) => {
     if (typeof user !== "object") return;
@@ -50,7 +53,7 @@ const ChatUsers = (props: Props) => {
       <UsersContainer>
         {!!participants ? (
           participants.map((el) => {
-            if (el)
+            if (el && el.id !== user.id)
               return (
                 <UserContainer
                   key={el.id}
