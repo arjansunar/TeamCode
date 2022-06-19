@@ -14,6 +14,7 @@ import {
 import { MeetingContext } from "../../common/meetingDetails";
 import Peer, { DataConnection } from "peerjs";
 import { UserContext, UserData } from "../../provider/UserProvider";
+import { addMessageOf, getMessagesOf } from "../../store/features/appMessages";
 
 type Props = {};
 
@@ -64,6 +65,12 @@ const ChatBox = (props: Props) => {
     if (!userMessage) return;
 
     myDataConnection?.send({ id: user.id, message: userMessage });
+    dispatch(
+      addMessageOf({
+        of: selectedUser.id,
+        messages: { id: user.id, message: userMessage },
+      })
+    );
     setMessages((messages) => [
       ...messages,
       { id: user.id, message: userMessage },
@@ -95,10 +102,16 @@ const ChatBox = (props: Props) => {
     if (!otherDataConnection) return;
 
     otherDataConnection.on("data", (data) => {
-      console.log("data found", data);
+      console.log("data found", data, messages);
+
+      dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
       setMessages((messages) => [...messages, data]);
     });
   }, [otherDataConnection]);
+  const messagesFromRedux = useSelector((state) =>
+    // @ts-ignore
+    getMessagesOf(state, selectedUser.id)
+  );
 
   return (
     <Container>
@@ -107,8 +120,8 @@ const ChatBox = (props: Props) => {
         <Name>{selectedUser.username}</Name>
       </Header>
       <Body>
-        {!!messages ? (
-          messages.map((el, i) => {
+        {!!messagesFromRedux ? (
+          messagesFromRedux.map((el, i) => {
             return (
               <Message key={i} isMe={user.id === el.id}>
                 {el.message}
