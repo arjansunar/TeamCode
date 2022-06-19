@@ -61,12 +61,17 @@ const ChatBox = (props: Props) => {
       createConnection();
       return;
     }
+    if (!userMessage) return;
 
     myDataConnection?.send({ id: user.id, message: userMessage });
     setMessages((messages) => [
       ...messages,
       { id: user.id, message: userMessage },
     ]);
+
+    if (otherDataConnection) {
+      otherDataConnection.send({ id: user.id, message: userMessage });
+    }
     setUserMessage("");
   };
 
@@ -115,12 +120,17 @@ const ChatBox = (props: Props) => {
         )}
       </Body>
       <Footer>
-        <MessageForm onSubmit={(e) => e.preventDefault()}>
+        <MessageForm
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+        >
           <MessageInput
             value={userMessage}
             onChange={(val) => setUserMessage(val.target.value)}
           />
-          <MessageButton onClick={handleSendMessage}>
+          <MessageButton type="submit" disabled={!userMessage}>
             <SendButton />
           </MessageButton>
         </MessageForm>
@@ -220,4 +230,8 @@ const MessageButton = styled.button`
   justify-content: center;
   align-items: center;
   width: 2.6rem;
+
+  &:disabled {
+    color: ${colors.theme["dark-400"]};
+  }
 `;
