@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
 import { ExecutionResults } from "../api/hooks/types/CodeExecutionRes";
 import { axiosJudge0 } from "../api/hooks/useAxios";
@@ -8,6 +8,8 @@ import { OutputScreen } from "../components";
 import colors from "../theme/colors.json";
 
 import AceEditor from "../components/AceEditor";
+import { ScaleLoader } from "react-spinners";
+import { UserContext, UserData } from "../provider/UserProvider";
 type Props = {};
 
 interface SubmissionSchema {
@@ -52,16 +54,24 @@ const getSubmissionResults = async (
 };
 
 const Editor = (props: Props) => {
+  const { user }: { user: UserData } = useContext(UserContext);
   const [code, setCode] = useState<string>("");
   const [output, setOutput] = useState<ExecutionResults>(
     {} as ExecutionResults
   );
 
+  const [codeExecutionLoading, setCodeExecutionLoading] = useState(false);
+
   const handleRunButton = async () => {
+    if (code.length < 1) {
+      alert("No code written!!");
+      return;
+    }
     try {
+      setCodeExecutionLoading(true);
       const { data: submission } = await getSubmissionToken(code);
       const { data: results } = await getSubmissionResults(submission.token);
-
+      setCodeExecutionLoading(false);
       setOutput(results);
     } catch (e) {
       console.log(e);
@@ -69,13 +79,27 @@ const Editor = (props: Props) => {
   };
 
   const handleShareButton = () => {
-    console.log("share code");
+    if (code.length < 1) {
+      alert("No code written!!");
+      return;
+    }
+    const encodedCode = btoa(code);
+    const shareLink = `http://localhost:3000/share?from=${user.id}?code=${encodedCode}`;
+    alert("share link: " + shareLink);
   };
 
   return (
     <Container>
       <SettingsWrapper>
-        <Button onClick={handleRunButton}>Run</Button>
+        {!codeExecutionLoading ? (
+          <Button onClick={handleRunButton} disabled={codeExecutionLoading}>
+            Run
+          </Button>
+        ) : (
+          <LoaderWrapper>
+            <ScaleLoader height={20} color={colors.theme["text-light"]} />
+          </LoaderWrapper>
+        )}
         <Button onClick={handleShareButton}>Share</Button>
       </SettingsWrapper>
       <AceEditor code={code} setCode={setCode} />
@@ -97,7 +121,14 @@ const SettingsWrapper = styled.div`
   gap: 1rem;
   padding-left: 40%;
 `;
-
+const LoaderWrapper = styled.div`
+  background-color: #4a99de;
+  padding: 8px 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.2rem;
+`;
 const Button = styled.button`
   background-color: #4a99de;
   border: none;
@@ -106,5 +137,9 @@ const Button = styled.button`
   color: ${colors["bg-light"]};
   border-radius: 0.2rem;
   cursor: pointer;
+
+  &:disabled {
+    background-color: ${colors.theme["dark-400"]};
+  }
 `;
 export default Editor;
