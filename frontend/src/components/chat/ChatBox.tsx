@@ -1,4 +1,13 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import {
+  ReactElement,
+  ReactHTMLElement,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styled, { css } from "styled-components";
 import colors from "../../theme/colors.json";
 
@@ -113,6 +122,14 @@ const ChatBox = (props: Props) => {
     getMessagesOf(state, selectedUser.id)
   );
 
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToView = () => {
+    if (!lastMessageRef) return;
+    lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(scrollToView, [messagesFromRedux]);
+
   return (
     <Container>
       <Header>
@@ -131,6 +148,7 @@ const ChatBox = (props: Props) => {
         ) : (
           <h3>Send a message</h3>
         )}
+        <HiddenLastElement ref={lastMessageRef} />
       </Body>
       <Footer>
         <MessageForm
@@ -190,6 +208,12 @@ const Body = styled.section`
   font-size: smaller;
   gap: 1rem;
   overflow-y: scroll;
+`;
+
+const HiddenLastElement = styled.div`
+  height: 0;
+  width: 0;
+  opacity: 0;
 `;
 
 interface MessageProps {
