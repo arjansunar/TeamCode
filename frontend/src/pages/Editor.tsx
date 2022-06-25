@@ -84,7 +84,7 @@ const Editor = (props: Props) => {
       return;
     }
     const encodedCode = btoa(code);
-    const shareLink = `http://localhost:3000/share?from=${user.id}?code=${encodedCode}`;
+    const shareLink = `http://localhost:3000/share?from=${user.id}&?code=${encodedCode}`;
     alert("share link: " + shareLink);
   };
 

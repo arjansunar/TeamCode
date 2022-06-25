@@ -25,6 +25,7 @@ import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
 import { useDispatch, useSelector } from "react-redux";
 import { addParticipants } from "./store/features/participants";
 import { MeetingContext } from "./common/meetingDetails";
+import ShareCode from "./pages/ShareCode";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -120,6 +121,7 @@ function App() {
               </SideBarWrapper>
             }
           />
+          <Route path="/share" element={<ShareCode />} />
           <Route path="/error" element={<Error />} />
         </Route>
         {/* end protected routes */}

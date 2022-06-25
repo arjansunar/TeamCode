@@ -34,12 +34,11 @@ type Message = {
 const MESSAGES = [] as Message[];
 
 const ChatBox = (props: Props) => {
-  const [messages, setMessages] = useState<Message[]>(MESSAGES);
-
   const [userMessage, setUserMessage] = useState<string>("");
 
   // selectors
   const selectedUser = useSelector(getSelectedParticipant);
+  console.log(selectedUser.id);
   // const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
   // const otherUserCon = useSelector((state) =>
   //   getOtherConnection(state, selectedUser.id)
@@ -57,43 +56,48 @@ const ChatBox = (props: Props) => {
   // redux
   const dispatch = useDispatch();
 
-  const createConnection = () => {
+  const createConnection = useCallback(() => {
     const { peerId } = selectedUser;
     // create connection
-    const dataCon = me.connect(peerId);
+    const dataCon = me.connect(peerId, { metadata: { userId: user.id } });
+    console.log("selected user: ", selectedUser.id, dataCon);
     // // save connection
     setMyDataConnection(dataCon);
-  };
+  }, [selectedUser.id, me]);
 
   const handleSendMessage = () => {
     if (!me) return;
     if (!myDataConnection) {
-      createConnection();
       return;
     }
     if (!userMessage) return;
 
-    myDataConnection?.send({ id: user.id, message: userMessage });
+    myDataConnection?.send({
+      id: user.id,
+      message: userMessage,
+      to: selectedUser.id,
+    });
+
     dispatch(
       addMessageOf({
         of: selectedUser.id,
         messages: { id: user.id, message: userMessage },
       })
     );
-    setMessages((messages) => [
-      ...messages,
-      { id: user.id, message: userMessage },
-    ]);
 
     if (otherDataConnection) {
-      otherDataConnection.send({ id: user.id, message: userMessage });
+      otherDataConnection.send({
+        id: user.id,
+        message: userMessage,
+        to: selectedUser.id,
+      });
     }
     setUserMessage("");
   };
 
   useEffect(() => {
     createConnection();
-  }, []);
+  }, [selectedUser.id]);
 
   console.log({ myDataConnection, otherDataConnection });
 
@@ -102,25 +106,41 @@ const ChatBox = (props: Props) => {
     if (!me) return;
 
     me.on("connection", (dataConnection) => {
-      console.log("another data connection ");
-      setOtherDataConnection(dataConnection);
+      console.log("metadata", dataConnection.metadata);
+      if (dataConnection.metadata.userId === selectedUser.id) {
+        console.log("another data connection ");
+        setOtherDataConnection(dataConnection);
+      }
     });
-  }, [me]);
+  }, [me, selectedUser]);
   // setting messages on receiver end
   useEffect(() => {
     if (!otherDataConnection) return;
 
     otherDataConnection.on("data", (data) => {
-      console.log("data found", data, messages);
-
-      dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
-      setMessages((messages) => [...messages, data]);
+      console.log("data found", data, messagesFromRedux);
+      if (data.id === selectedUser.id && data.to === user.id) {
+        dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
+      }
     });
-  }, [otherDataConnection]);
+  }, [otherDataConnection, selectedUser, dispatch]);
+
+  useEffect(() => {
+    if (!myDataConnection) return;
+    myDataConnection.on("open", () => {
+      myDataConnection.on("data", (data) => {
+        console.log("data mycon", data);
+        if (data.id === selectedUser.id && data.to === user.id) {
+          dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
+        }
+      });
+    });
+  }, [myDataConnection, selectedUser, dispatch]);
   const messagesFromRedux = useSelector((state) =>
     // @ts-ignore
     getMessagesOf(state, selectedUser.id)
   );
+  console.log({ messagesFromRedux });
 
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
