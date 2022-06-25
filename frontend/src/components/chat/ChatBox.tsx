@@ -76,12 +76,17 @@ const ChatBox = (props: Props) => {
       id: user.id,
       message: userMessage,
       to: selectedUser.id,
+      time: new Date().toDateString(),
     });
 
     dispatch(
       addMessageOf({
         of: selectedUser.id,
-        messages: { id: user.id, message: userMessage },
+        messages: {
+          id: user.id,
+          message: userMessage,
+          time: new Date().toDateString(),
+        },
       })
     );
 
@@ -90,6 +95,7 @@ const ChatBox = (props: Props) => {
         id: user.id,
         message: userMessage,
         to: selectedUser.id,
+        time: new Date(),
       });
     }
     setUserMessage("");
@@ -116,12 +122,22 @@ const ChatBox = (props: Props) => {
   // setting messages on receiver end
   useEffect(() => {
     if (!otherDataConnection) return;
-
-    otherDataConnection.on("data", (data) => {
-      console.log("data found", data, messagesFromRedux);
-      if (data.id === selectedUser.id && data.to === user.id) {
-        dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
-      }
+    otherDataConnection.on("open", () => {
+      otherDataConnection.on("data", (data) => {
+        console.log("data found", data, messagesFromRedux);
+        if (data.id === selectedUser.id && data.to === user.id) {
+          if (
+            messagesFromRedux &&
+            new Date(data.time).getMinutes() ===
+              new Date(
+                messagesFromRedux[messagesFromRedux.length - 1].time
+              ).getMinutes()
+          ) {
+            return;
+          }
+          dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
+        }
+      });
     });
   }, [otherDataConnection, selectedUser, dispatch]);
 
@@ -131,6 +147,15 @@ const ChatBox = (props: Props) => {
       myDataConnection.on("data", (data) => {
         console.log("data mycon", data);
         if (data.id === selectedUser.id && data.to === user.id) {
+          if (
+            messagesFromRedux &&
+            new Date(data.time).getMinutes() ===
+              new Date(
+                messagesFromRedux[messagesFromRedux.length - 1].time
+              ).getMinutes()
+          ) {
+            return;
+          }
           dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
         }
       });

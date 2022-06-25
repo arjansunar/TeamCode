@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-type Message = { id: number; message: string };
+type Message = { id: number; message: string; time: string };
 type GlobalMessages = Record<string, Message[]>;
 const initialState = {
   allMessages: {} as GlobalMessages,
