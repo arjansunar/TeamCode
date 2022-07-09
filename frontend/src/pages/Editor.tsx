@@ -26,6 +26,8 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import { AiFillCopy as CopyIcon } from "react-icons/ai";
 import { FaClipboardCheck as CopiedIcon } from "react-icons/fa";
 
+import { v4 as uuid } from "uuid";
+
 interface SubmissionSchema {
   language_id: number;
   source_code: string;
@@ -103,7 +105,6 @@ const Editor = (props: Props) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(false);
 
-  const [shareToId, setShareToId] = useState<number>();
   const [shareLink, setShareLink] = useState<string>("");
 
   const [codeExecutionLoading, setCodeExecutionLoading] = useState(false);
@@ -172,7 +173,7 @@ const Editor = (props: Props) => {
           code
         )}&shareTo=${selectedUser.id}&readOnly=${
           isReadOnly ? ReadOnly.TRUE : ReadOnly.False
-        }`
+        }&roomId=${uuid()}`
       );
     }
   }, [selectedUser, isReadOnly, code]);
@@ -230,11 +231,12 @@ const Container = styled.main`
   overflow: hidden;
 `;
 
-const SettingsWrapper = styled.div`
+export const SettingsWrapper = styled.div`
   background-color: ${colors["bg-dark"]};
   height: 100%;
   display: flex;
   gap: 1rem;
+  padding: 5px;
   padding-left: 40%;
 `;
 const LoaderWrapper = styled.div`
@@ -245,13 +247,18 @@ const LoaderWrapper = styled.div`
   align-items: center;
   border-radius: 0.2rem;
 `;
-const Button = styled.button`
+export const Button = styled.button`
   background-color: #4a99de;
   border: none;
   font-size: 16px;
-  padding: 8px 18px;
+  padding: 5px 18px;
   color: ${colors["bg-light"]};
   border-radius: 0.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  max-height: fit-content;
   cursor: pointer;
 
   &:disabled {

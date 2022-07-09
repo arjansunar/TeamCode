@@ -34,6 +34,8 @@ export class SignallServerGateway implements OnGatewayInit {
   // use db for later
   private rooms: Record<string, string[]> = {};
 
+  private shRooms: Record<string, string[]> = {};
+
   afterInit(server: any) {
     this.logger.log('Initialized');
   }
@@ -95,5 +97,38 @@ export class SignallServerGateway implements OnGatewayInit {
       participants: participants,
       me: { username, myPeerId },
     });
+  }
+  /*! for sharing code  */
+  @SubscribeMessage('sh-join-room')
+  handleJoinShRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+  ) {
+    console.log('user joined', roomId);
+    if (!this.shRooms[roomId]) this.shRooms[roomId] = [];
+    // only 2 users can join the room
+    // if (this.shRooms[roomId].length < 2) {
+    client.join(roomId);
+    this.shRooms[roomId].push(client.id);
+    // }
+  }
+
+  @SubscribeMessage('sh-leave-room')
+  handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+  ) {
+    client.disconnect();
+    this.shRooms[roomId].splice(this.shRooms[roomId].indexOf(client.id), 1);
+  }
+
+  @SubscribeMessage('sh-send-message')
+  handleSendMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+    @MessageBody('code') code: string,
+  ) {
+    console.log('message');
+    client.broadcast.to(roomId).emit('message', { code });
   }
 }
