@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { SignallServerModule } from './signall-server/signall-server.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { ShareCodeServerGateway } from './share-code/share-code-server.gateway';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { RoomsModule } from './rooms/rooms.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    ShareCodeServerGateway,
   ],
 })
 export class AppModule {}

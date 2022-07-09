@@ -11,26 +11,15 @@ import {
 import { setSelected } from "../../store/features/selectedParticipant";
 import { UserContext, UserData } from "../../provider/UserProvider";
 
-type Props = {};
+type Props = {
+  selectable?: boolean;
+};
 
-const ChatUsers = (props: Props) => {
-  const [searchUser, setSearchUser] = useState("");
+const ChatUsers = ({ selectable }: Props) => {
   const participants = useSelector(getParticipants);
 
   // redux
   const reduxDispatch = useDispatch();
-  const handleSearchChange = (val: ChangeEvent) => {
-    // @ts-ignore
-    const searchText = val.target.value;
-    if (!searchText) return;
-    setSearchUser(searchText);
-  };
-  // console.log({ participants });
-
-  const handleSearchSubmit = () => {
-    // console.log({ searchUser });
-  };
-  // console.log({ searchUser });
 
   const { user }: { user: UserData } = useContext(UserContext);
 
@@ -38,34 +27,34 @@ const ChatUsers = (props: Props) => {
     if (typeof user !== "object") return;
     reduxDispatch(setSelected(user));
   };
+  console.log({ participants });
   return (
     <Container>
-      <SearchWrapper onSubmit={(e) => e.preventDefault()}>
-        <SearchBar
-          placeholder="Search User"
-          value={searchUser}
-          onChange={(e) => handleSearchChange(e)}
-        />
-        <SearchButton onClick={handleSearchSubmit}>
-          <SearchIcon />
-        </SearchButton>
-      </SearchWrapper>
-      <UsersContainer>
-        {!!participants ? (
+      <UsersContainer hasMargin={!!participants.length}>
+        {!!participants && participants.length ? (
           participants.map((el) => {
-            if (el && el.id !== user.id)
+            if (el && el.id !== user.id) {
+              if (selectable) {
+                return (
+                  <UserContainer
+                    key={el.id}
+                    onClick={() => setSelectedParticipant(el)}
+                  >
+                    <UserImage src={el.photo} />
+                    <UserName>{el.username}</UserName>
+                  </UserContainer>
+                );
+              }
               return (
-                <UserContainer
-                  key={el.id}
-                  onClick={() => setSelectedParticipant(el)}
-                >
+                <UserContainer key={el.id}>
                   <UserImage src={el.photo} />
                   <UserName>{el.username}</UserName>
                 </UserContainer>
               );
+            }
           })
         ) : (
-          <h4>No users joined </h4>
+          <NoUsersContainer>No users joined </NoUsersContainer>
         )}
       </UsersContainer>
     </Container>
@@ -79,37 +68,23 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
-const SearchBar = styled.input`
-  background-color: ${colors.theme["dark-800"]};
-  color: ${colors.theme["text-light-muted"]};
-  border: none;
-  padding: 0.8rem 1.5rem;
-  outline: none;
-  border-radius: 0.5rem;
-  width: 100%;
-`;
-const SearchWrapper = styled.form`
-  display: flex;
-  background-color: ${colors.theme["dark-800"]};
-`;
-
-const SearchButton = styled.button`
+const NoUsersContainer = styled.div`
   color: ${colors.theme["text-light"]};
-  background-color: ${colors.theme["dark-400"]};
-  padding: 0 0.6rem;
-  outline: none;
-  border: none;
+  min-height: 2rem;
   display: flex;
-  place-items: center;
-  border-radius: 0 0.5rem 0.5rem 0;
+  align-items: center;
 `;
 
-const UsersContainer = styled.div`
+interface UserContainerProps {
+  hasMargin?: boolean;
+}
+
+const UsersContainer = styled.div<UserContainerProps>`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  margin: 2rem auto 0 auto;
+  margin: ${({ hasMargin }) => (hasMargin ? "1rem auto 0 auto" : "0 auto")};
   gap: 1rem;
   overflow-y: scroll;
   height: 80%;
