@@ -17,7 +17,7 @@ interface AuthData {
   access_token: string;
 }
 
-const SERVER_IP = "http://192.168.1.74:5000/auth/";
+const SERVER_IP = "http://localhost:5000/auth/";
 function Login({}: Props) {
   const handleLoginWithGithub = () => {
     window.open(SERVER_IP, "_self");

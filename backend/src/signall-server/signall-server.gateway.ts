@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsersService } from 'src/users';
+import { AppMessage } from './types';
 
 interface Payload {
   target: string;
@@ -98,6 +99,16 @@ export class SignallServerGateway implements OnGatewayInit {
       me: { username, myPeerId },
     });
   }
+
+  /* group chat */
+  @SubscribeMessage('send-to-group')
+  handleSendToGroup(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+    @MessageBody('message') message: AppMessage,
+  ) {
+    client.broadcast.to(roomId).emit('group-message', message);
+  }
   /*! for sharing code  */
   @SubscribeMessage('sh-join-room')
   handleJoinShRoom(
@@ -128,7 +139,6 @@ export class SignallServerGateway implements OnGatewayInit {
     @MessageBody('roomId') roomId: string,
     @MessageBody('code') code: string,
   ) {
-    console.log('message');
     client.broadcast.to(roomId).emit('message', { code });
   }
 }

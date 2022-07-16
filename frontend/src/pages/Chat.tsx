@@ -7,15 +7,10 @@ import { getSelectedParticipant } from "../store/features/selectedParticipant";
 type Props = {};
 
 const Chat = (props: Props) => {
-  const selectedUser = useSelector(getSelectedParticipant);
   return (
     <Container>
       <ChatUsers />
-      {Object.keys(selectedUser).length > 1 ? (
-        <ChatBox />
-      ) : (
-        <div style={{ color: "red" }}>select a user</div>
-      )}
+      <ChatBox />
     </Container>
   );
 };

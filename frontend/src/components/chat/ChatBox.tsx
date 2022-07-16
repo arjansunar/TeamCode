@@ -17,13 +17,18 @@ import { getSelectedParticipant } from "../../store/features/selectedParticipant
 import {
   getMyConnection,
   getOtherConnection,
+  getParticipants,
   setMyDataConnection,
   setOtherDataConnection,
 } from "../../store/features/participants";
 import { MeetingContext } from "../../common/meetingDetails";
 import Peer, { DataConnection } from "peerjs";
 import { UserContext, UserData } from "../../provider/UserProvider";
-import { addMessageOf, getMessagesOf } from "../../store/features/appMessages";
+import {
+  addMessageOf,
+  getMessagesOf,
+  Message as AppMessage,
+} from "../../store/features/appMessages";
 
 type Props = {};
 
@@ -31,21 +36,26 @@ type Message = {
   id: number;
   message: string;
 };
-const MESSAGES = [] as Message[];
 
+const MESSAGES = [] as AppMessage[];
 const ChatBox = (props: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
+  const [appMessages, setAppMessages] = useState<AppMessage[]>(MESSAGES);
 
   // selectors
   const selectedUser = useSelector(getSelectedParticipant);
-  console.log(selectedUser.id);
+  // meeting participants
+  const participants = useSelector(getParticipants);
+
   // const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
   // const otherUserCon = useSelector((state) =>
   //   getOtherConnection(state, selectedUser.id)
   // );
 
   // local connection instances
-  const [myDataConnection, setMyDataConnection] = useState<DataConnection>();
+  const [myDataConnections, setMyDataConnections] = useState<
+    Record<string, DataConnection>
+  >({});
   const [otherDataConnection, setOtherDataConnection] =
     useState<DataConnection>();
 
@@ -57,115 +67,102 @@ const ChatBox = (props: Props) => {
   const dispatch = useDispatch();
 
   const createConnection = useCallback(() => {
-    const { peerId } = selectedUser;
-    // create connection
-    const dataCon = me.connect(peerId, { metadata: { userId: user.id } });
-    console.log("selected user: ", selectedUser.id, dataCon);
-    // // save connection
-    setMyDataConnection(dataCon);
-  }, [selectedUser.id, me]);
+    participants
+      .filter((el) => el.id !== user.id)
+      .forEach((participant) => {
+        const { peerId } = participant;
+        // create connection
+        const dataCon = me.connect(peerId, { metadata: { userId: user.id } });
+
+        // save connection
+
+        setMyDataConnections((prev) => {
+          prev[peerId] = dataCon;
+          return prev;
+        });
+      });
+  }, [participants, me]);
 
   const handleSendMessage = () => {
     if (!me) return;
-    if (!myDataConnection) {
+    if (!myDataConnections) {
       return;
     }
     if (!userMessage) return;
 
-    myDataConnection?.send({
-      id: user.id,
-      message: userMessage,
-      to: selectedUser.id,
-      time: new Date().toDateString(),
-    });
-
-    dispatch(
-      addMessageOf({
-        of: selectedUser.id,
-        messages: {
-          id: user.id,
-          message: userMessage,
-          time: new Date().toDateString(),
-        },
-      })
-    );
-
-    if (otherDataConnection) {
-      otherDataConnection.send({
+    Object.values(myDataConnections)?.forEach((con) =>
+      con.send({
         id: user.id,
         message: userMessage,
-        to: selectedUser.id,
-        time: new Date(),
-      });
-    }
+        time: new Date().toDateString(),
+      })
+    );
+    // add message to store
+    setAppMessages((prev) => [
+      ...prev,
+      {
+        id: user.id,
+        message: userMessage,
+        time: new Date().toDateString(),
+      },
+    ]);
+    // dispatch(
+    //   addMessageOf({
+    //     of: selectedUser.id,
+    //     messages:  {
+    //       id: user.id,
+    //       message: userMessage,
+    //       time: new Date().toDateString(),
+    //     },
+    //   })
+    // );
+
+    // if (otherDataConnection) {
+    //   otherDataConnection.send({
+    //     id: user.id,
+    //     message: userMessage,
+    //     to: selectedUser.id,
+    //     time: new Date(),
+    //   });
+    // }
     setUserMessage("");
   };
 
+  // creates connection
   useEffect(() => {
     createConnection();
-  }, [selectedUser.id]);
-
-  console.log({ myDataConnection, otherDataConnection });
+  }, [participants]);
 
   // setting other user connection object
   useEffect(() => {
     if (!me) return;
 
     me.on("connection", (dataConnection) => {
-      console.log("metadata", dataConnection.metadata);
-      if (dataConnection.metadata.userId === selectedUser.id) {
-        console.log("another data connection ");
-        setOtherDataConnection(dataConnection);
-      }
+      setOtherDataConnection(dataConnection);
     });
-  }, [me, selectedUser]);
+  }, [me, participants]);
+
   // setting messages on receiver end
   useEffect(() => {
     if (!otherDataConnection) return;
-    otherDataConnection.on("open", () => {
-      otherDataConnection.on("data", (data) => {
-        console.log("data found", data, messagesFromRedux);
-        if (data.id === selectedUser.id && data.to === user.id) {
-          if (
-            messagesFromRedux &&
-            new Date(data.time).getMinutes() ===
-              new Date(
-                messagesFromRedux[messagesFromRedux.length - 1].time
-              ).getMinutes()
-          ) {
-            return;
-          }
-          dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
-        }
-      });
-    });
-  }, [otherDataConnection, selectedUser, dispatch]);
 
-  useEffect(() => {
-    if (!myDataConnection) return;
-    myDataConnection.on("open", () => {
-      myDataConnection.on("data", (data) => {
-        console.log("data mycon", data);
-        if (data.id === selectedUser.id && data.to === user.id) {
-          if (
-            messagesFromRedux &&
-            new Date(data.time).getMinutes() ===
-              new Date(
-                messagesFromRedux[messagesFromRedux.length - 1].time
-              ).getMinutes()
-          ) {
-            return;
-          }
-          dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
-        }
-      });
+    otherDataConnection.on("data", (data) => {
+      console.log("data found", data);
+
+      setAppMessages((prev) => [...prev, data]);
+      // dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
     });
-  }, [myDataConnection, selectedUser, dispatch]);
+  }, [otherDataConnection, participants]);
+
+  Object.values(myDataConnections).forEach((con) => {
+    con.on("data", (data) => {
+      console.log("data found my connections ", data);
+    });
+  });
   const messagesFromRedux = useSelector((state) =>
     // @ts-ignore
     getMessagesOf(state, selectedUser.id)
   );
-  console.log({ messagesFromRedux });
 
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
@@ -173,17 +170,17 @@ const ChatBox = (props: Props) => {
     if (!lastMessageRef) return;
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useEffect(scrollToView, [messagesFromRedux]);
+  useEffect(scrollToView, [MESSAGES]);
 
   return (
     <Container>
       <Header>
-        <Img src={selectedUser.photo} />
-        <Name>{selectedUser.username}</Name>
+        <Img src={user.photo} />
+        <Name>{participants.length} participants</Name>
       </Header>
       <Body>
-        {!!messagesFromRedux ? (
-          messagesFromRedux.map((el, i) => {
+        {!!appMessages ? (
+          appMessages.map((el, i) => {
             return (
               <Message key={i} isMe={user.id === el.id}>
                 {el.message}
