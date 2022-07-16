@@ -29,6 +29,7 @@ import {
   getMessagesOf,
   Message as AppMessage,
 } from "../../store/features/appMessages";
+import { Socket } from "socket.io-client";
 
 type Props = {};
 
@@ -41,128 +42,42 @@ const MESSAGES = [] as AppMessage[];
 const ChatBox = (props: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const [appMessages, setAppMessages] = useState<AppMessage[]>(MESSAGES);
+  // websocket connection
+  const { ws }: { ws: Socket } = useContext(MeetingContext);
 
-  // selectors
-  const selectedUser = useSelector(getSelectedParticipant);
   // meeting participants
   const participants = useSelector(getParticipants);
 
-  // const myCon = useSelector((state) => getMyConnection(state, selectedUser.id));
-  // const otherUserCon = useSelector((state) =>
-  //   getOtherConnection(state, selectedUser.id)
-  // );
-
-  // local connection instances
-  const [myDataConnections, setMyDataConnections] = useState<
-    Record<string, DataConnection>
-  >({});
-  const [otherDataConnection, setOtherDataConnection] =
-    useState<DataConnection>();
-
-  // my peer instance
-  const { me }: { me: Peer } = useContext(MeetingContext);
   const { user }: { user: UserData } = useContext(UserContext);
 
-  // redux
-  const dispatch = useDispatch();
-
-  const createConnection = useCallback(() => {
-    participants
-      .filter((el) => el.id !== user.id)
-      .forEach((participant) => {
-        const { peerId } = participant;
-        // create connection
-        const dataCon = me.connect(peerId, { metadata: { userId: user.id } });
-
-        // save connection
-
-        setMyDataConnections((prev) => {
-          prev[peerId] = dataCon;
-          return prev;
-        });
-      });
-  }, [participants, me]);
-
   const handleSendMessage = () => {
-    if (!me) return;
-    if (!myDataConnections) {
-      return;
-    }
-    if (!userMessage) return;
+    const message: AppMessage = {
+      id: user.id,
+      message: userMessage,
+      time: new Date().toISOString(),
+    };
 
-    Object.values(myDataConnections)?.forEach((con) =>
-      con.send({
-        id: user.id,
-        message: userMessage,
-        time: new Date().toDateString(),
-      })
-    );
+    const messageDTO = {
+      // * get from redux store
+      roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
+      message,
+    };
+    // emit ws event
+    ws.emit("send-to-group", messageDTO);
     // add message to store
-    setAppMessages((prev) => [
-      ...prev,
-      {
-        id: user.id,
-        message: userMessage,
-        time: new Date().toDateString(),
-      },
-    ]);
-    // dispatch(
-    //   addMessageOf({
-    //     of: selectedUser.id,
-    //     messages:  {
-    //       id: user.id,
-    //       message: userMessage,
-    //       time: new Date().toDateString(),
-    //     },
-    //   })
-    // );
+    setAppMessages((prev) => [...prev, message]);
 
-    // if (otherDataConnection) {
-    //   otherDataConnection.send({
-    //     id: user.id,
-    //     message: userMessage,
-    //     to: selectedUser.id,
-    //     time: new Date(),
-    //   });
-    // }
     setUserMessage("");
   };
 
-  // creates connection
+  // receive messages
   useEffect(() => {
-    createConnection();
-  }, [participants]);
-
-  // setting other user connection object
-  useEffect(() => {
-    if (!me) return;
-
-    me.on("connection", (dataConnection) => {
-      setOtherDataConnection(dataConnection);
+    ws.emit("join-group", { roomId: "98831f68-9147-483c-aa77-737b3cbebcc9" });
+    ws.on("group-message", (data) => {
+      console.log("group-message", data);
+      setAppMessages(data.history);
     });
-  }, [me, participants]);
-
-  // setting messages on receiver end
-  useEffect(() => {
-    if (!otherDataConnection) return;
-
-    otherDataConnection.on("data", (data) => {
-      console.log("data found", data);
-
-      setAppMessages((prev) => [...prev, data]);
-      // dispatch(addMessageOf({ of: selectedUser.id, messages: data }));
-    });
-  }, [otherDataConnection, participants]);
-
-  Object.values(myDataConnections).forEach((con) => {
-    con.on("data", (data) => {
-      console.log("data found my connections ", data);
-    });
-  });
-  const messagesFromRedux = useSelector((state) =>
-    // @ts-ignore
-    getMessagesOf(state, selectedUser.id)
-  );
+  }, [ws]);
 
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
@@ -182,9 +97,18 @@ const ChatBox = (props: Props) => {
         {!!appMessages ? (
           appMessages.map((el, i) => {
             return (
-              <Message key={i} isMe={user.id === el.id}>
-                {el.message}
-              </Message>
+              <MessageFlexContainer isMe={user.id === el.id}>
+                <Img
+                  src={
+                    participants.find((participant) => participant.id == el.id)
+                      ?.photo
+                  }
+                  size="1.5rem"
+                />
+                <Message key={i} isMe={user.id === el.id}>
+                  {el.message}
+                </Message>
+              </MessageFlexContainer>
             );
           })
         ) : (
@@ -234,10 +158,14 @@ const Header = styled.div`
   border-radius: 0 0 2px 2px;
 `;
 
+const getHeightAndWidth = (size: string) => css`
+  height: ${size};
+  width: ${size};
+`;
 const Name = styled.h3``;
-const Img = styled.img`
-  height: 2rem;
-  width: 2rem;
+const Img = styled.img<{ size?: string }>`
+  ${({ size }) => (size ? getHeightAndWidth(size) : getHeightAndWidth("2rem"))}
+
   object-fit: cover;
   object-position: center;
   border-radius: 50%;
@@ -265,8 +193,15 @@ interface MessageProps {
 const messageBlueColor = colors.theme.message["bg-light-blue"];
 const MessageBlue = css`
   background-color: ${messageBlueColor};
-  align-self: flex-end;
   border-radius: 1em 2px 1em 1em;
+`;
+
+const MessageFlexContainer = styled.div<MessageProps>`
+  display: flex;
+  gap: 0.5rem;
+
+  ${({ isMe }) =>
+    isMe ? " align-self: flex-end;   flex-direction: row-reverse;" : null}
 `;
 
 const Message = styled.p<MessageProps>`

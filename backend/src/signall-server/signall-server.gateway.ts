@@ -37,6 +37,8 @@ export class SignallServerGateway implements OnGatewayInit {
 
   private shRooms: Record<string, string[]> = {};
 
+  private groupChatMessages: AppMessage[] = [];
+
   afterInit(server: any) {
     this.logger.log('Initialized');
   }
@@ -101,13 +103,25 @@ export class SignallServerGateway implements OnGatewayInit {
   }
 
   /* group chat */
+  @SubscribeMessage('join-group')
+  handleGroupJoin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+  ) {
+    console.log('client joins');
+    client.join(roomId);
+  }
   @SubscribeMessage('send-to-group')
   handleSendToGroup(
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
     @MessageBody('message') message: AppMessage,
   ) {
-    client.broadcast.to(roomId).emit('group-message', message);
+    console.log('message sent to group', roomId, message);
+    this.groupChatMessages.push(message);
+    client.broadcast
+      .to(roomId)
+      .emit('group-message', { history: this.groupChatMessages });
   }
   /*! for sharing code  */
   @SubscribeMessage('sh-join-room')
