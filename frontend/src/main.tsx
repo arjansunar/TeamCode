@@ -15,7 +15,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { MeetingProvider } from "./common/meetingDetails";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  <>
     <BrowserRouter>
       <CookiesProvider>
         <ReduxProvider store={store}>
@@ -27,5 +27,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ReduxProvider>
       </CookiesProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </>
 );

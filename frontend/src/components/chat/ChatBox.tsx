@@ -1,4 +1,6 @@
 import {
+  ChangeEventHandler,
+  MouseEventHandler,
   ReactElement,
   ReactHTMLElement,
   ReactNode,
@@ -12,6 +14,7 @@ import styled, { css } from "styled-components";
 import colors from "../../theme/colors.json";
 
 import { RiSendPlaneFill as SendButton } from "react-icons/ri";
+import { BsCloudUploadFill as FileIcon } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { getSelectedParticipant } from "../../store/features/selectedParticipant";
 import {
@@ -33,15 +36,14 @@ import { Socket } from "socket.io-client";
 
 type Props = {};
 
-type Message = {
-  id: number;
-  message: string;
-};
+const File_types = ["jpeg", "jpg", "png"];
 
 const MESSAGES = [] as AppMessage[];
 const ChatBox = (props: Props) => {
   const [userMessage, setUserMessage] = useState<string>("");
   const [appMessages, setAppMessages] = useState<AppMessage[]>(MESSAGES);
+  const [shareFile, setShareFile] = useState<string>();
+  const [uploadFile, setUploadFile] = useState<File>();
   // websocket connection
   const { ws }: { ws: Socket } = useContext(MeetingContext);
 
@@ -51,21 +53,40 @@ const ChatBox = (props: Props) => {
   const { user }: { user: UserData } = useContext(UserContext);
 
   const handleSendMessage = () => {
-    const message: AppMessage = {
-      id: user.id,
-      message: userMessage,
-      time: new Date().toISOString(),
-    };
-
-    const messageDTO = {
-      // * get from redux store
-      roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
-      message,
-    };
-    // emit ws event
-    ws.emit("send-to-group", messageDTO);
-    // add message to store
-    setAppMessages((prev) => [...prev, message]);
+    if (!shareFile) {
+      console.log("Message");
+      const message: AppMessage = {
+        id: user.id,
+        message: userMessage,
+        time: new Date().toISOString(),
+        type: "text",
+      };
+      const messageDTO = {
+        // * get from redux store
+        roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
+        message,
+      };
+      // emit ws event
+      ws.emit("send-to-group", messageDTO);
+      // add message to store
+      setAppMessages((prev) => [...prev, message]);
+    } else {
+      const message: AppMessage = {
+        id: user.id,
+        message: shareFile,
+        time: new Date().toISOString(),
+        type: "file",
+      };
+      const messageDTO = {
+        // * get from redux store
+        roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
+        message,
+      };
+      // emit ws event
+      ws.emit("send-to-group", messageDTO);
+      setAppMessages((prev) => [...prev, message]);
+      setUploadFile(undefined);
+    }
 
     setUserMessage("");
   };
@@ -73,8 +94,11 @@ const ChatBox = (props: Props) => {
   // receive messages
   useEffect(() => {
     ws.emit("join-group", { roomId: "98831f68-9147-483c-aa77-737b3cbebcc9" });
-    ws.on("group-message", (data) => {
+    ws.on("group-message", (data: { message: AppMessage }) => {
       console.log("group-message", data);
+      setAppMessages((prev) => [...prev, data.message]);
+    });
+    ws.on("group-joined", (data) => {
       setAppMessages(data.history);
     });
   }, [ws]);
@@ -85,7 +109,47 @@ const ChatBox = (props: Props) => {
     if (!lastMessageRef) return;
     lastMessageRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useEffect(scrollToView, [MESSAGES]);
+  useEffect(scrollToView, [appMessages]);
+
+  /* file uploader */
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const handleFileUpload:
+    | MouseEventHandler<HTMLButtonElement>
+    | undefined = () => {
+    // get file
+    if (!fileRef) return;
+    fileRef.current?.click();
+  };
+
+  const handleFileInputChange: ChangeEventHandler<HTMLInputElement> = () => {
+    if (!fileRef) return;
+    if (!fileRef.current?.files?.[0]) return;
+    // check file support
+    if (File_types.includes(fileRef.current.files[0].type.substring(6))) {
+      const myFile = fileRef.current?.files[0];
+      setUploadFile(myFile);
+      setUserMessage(myFile.name);
+    } else {
+      console.log("file type not supported");
+      setUploadFile(undefined);
+    }
+  };
+
+  /* handle file changes and uploading */
+  useEffect(() => {
+    if (uploadFile) {
+      const render = new FileReader();
+      render.onload = () => {
+        setShareFile(render.result as string);
+      };
+      render.readAsDataURL(uploadFile);
+    } else {
+      setShareFile("");
+    }
+  }, [uploadFile]);
+
+  console.log({ userMessage, uploadFile, shareFile });
+  console.table(appMessages);
 
   return (
     <Container>
@@ -96,8 +160,23 @@ const ChatBox = (props: Props) => {
       <Body>
         {!!appMessages ? (
           appMessages.map((el, i) => {
+            if (el.type === "file") {
+              return (
+                <MessageFlexContainer key={i} isMe={user.id === el.id}>
+                  <Img
+                    src={
+                      participants.find(
+                        (participant) => participant.id == el.id
+                      )?.photo
+                    }
+                    size="1.5rem"
+                  />
+                  <ImagePreview src={el.message} />
+                </MessageFlexContainer>
+              );
+            }
             return (
-              <MessageFlexContainer isMe={user.id === el.id}>
+              <MessageFlexContainer key={i} isMe={user.id === el.id}>
                 <Img
                   src={
                     participants.find((participant) => participant.id == el.id)
@@ -105,9 +184,7 @@ const ChatBox = (props: Props) => {
                   }
                   size="1.5rem"
                 />
-                <Message key={i} isMe={user.id === el.id}>
-                  {el.message}
-                </Message>
+                <Message isMe={user.id === el.id}>{el.message}</Message>
               </MessageFlexContainer>
             );
           })
@@ -127,6 +204,20 @@ const ChatBox = (props: Props) => {
             value={userMessage}
             onChange={(val) => setUserMessage(val.target.value)}
           />
+          <FileUploader
+            type="button"
+            onClick={handleFileUpload}
+            disabled={userMessage.length > 0}
+          >
+            <FileIcon />
+            <input
+              type={"file"}
+              style={{ display: "none" }}
+              ref={fileRef}
+              accept="*.png, *.jpg, *.jpeg, *.pdf"
+              onChange={handleFileInputChange}
+            />
+          </FileUploader>
           <MessageButton type="submit" disabled={!userMessage}>
             <SendButton />
           </MessageButton>
@@ -180,6 +271,16 @@ const Body = styled.section`
   overflow-y: scroll;
 `;
 
+const FileUploader = styled.button<{ disabled: boolean }>`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: ${colors.theme["text-light"]};
+  background-color: transparent;
+  border: none;
+  ${({ disabled }) => (disabled ? `opacity: 0.5; cursor: not-allowed ` : "")}
+`;
+
 const HiddenLastElement = styled.div`
   height: 0;
   width: 0;
@@ -222,7 +323,7 @@ const Footer = styled.section`
 const MessageForm = styled.form`
   display: flex;
   background-color: ${colors.theme["dark-800"]};
-  gap: 0.4rem;
+  gap: 0.3rem;
 `;
 const MessageInput = styled.input`
   flex: 1;
@@ -247,5 +348,11 @@ const MessageButton = styled.button`
 
   &:disabled {
     color: ${colors.theme["dark-400"]};
+    cursor: not-allowed;
   }
+`;
+
+const ImagePreview = styled.img`
+  width: 10rem;
+  height: auto;
 `;

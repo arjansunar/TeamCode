@@ -104,24 +104,41 @@ export class SignallServerGateway implements OnGatewayInit {
 
   /* group chat */
   @SubscribeMessage('join-group')
-  handleGroupJoin(
+  async handleGroupJoin(
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
   ) {
     console.log('client joins');
     client.join(roomId);
+    const participants = await Promise.all(
+      this.rooms[roomId].map(
+        async (id) => await this.usersService.findUserWithPeerId(id),
+      ),
+    );
+    if (participants.length < 0) {
+      this.groupChatMessages = [];
+    }
+    this.server
+      .to(client.id)
+      .emit('group-joined', { history: this.groupChatMessages });
   }
   @SubscribeMessage('send-to-group')
-  handleSendToGroup(
+  async handleSendToGroup(
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
     @MessageBody('message') message: AppMessage,
   ) {
     console.log('message sent to group', roomId, message);
+    const participants = await Promise.all(
+      this.rooms[roomId].map(
+        async (id) => await this.usersService.findUserWithPeerId(id),
+      ),
+    );
+    if (participants.length < 0) {
+      this.groupChatMessages = [];
+    }
     this.groupChatMessages.push(message);
-    client.broadcast
-      .to(roomId)
-      .emit('group-message', { history: this.groupChatMessages });
+    client.broadcast.to(roomId).emit('group-message', { message: message });
   }
   /*! for sharing code  */
   @SubscribeMessage('sh-join-room')
@@ -129,7 +146,6 @@ export class SignallServerGateway implements OnGatewayInit {
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
   ) {
-    console.log('user joined', roomId);
     if (!this.shRooms[roomId]) this.shRooms[roomId] = [];
     // only 2 users can join the room
     // if (this.shRooms[roomId].length < 2) {
