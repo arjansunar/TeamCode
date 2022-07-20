@@ -201,6 +201,7 @@ const Editor = (props: Props) => {
         onRequestClose={closeModal}
         style={customStyles}
         contentLabel="Example Modal"
+        shouldCloseOnEsc
       >
         <DisplayRoomLink>PARTICIPANTS</DisplayRoomLink>
         <ChatUsers selectable />
@@ -217,9 +218,7 @@ const Editor = (props: Props) => {
               {shareLink}
             </DisplayRoomLink>
           </CopyToClipboard>
-        ) : (
-          <DisplayRoomLink>hello</DisplayRoomLink>
-        )}
+        ) : null}
       </Modal>
     </Container>
   );

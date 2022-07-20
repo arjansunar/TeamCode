@@ -8,5 +8,6 @@ import { RoomsService } from './rooms.service';
   imports: [PrismaModule, UsersModule],
   controllers: [RoomsController],
   providers: [RoomsService],
+  exports: [RoomsService],
 })
 export class RoomsModule {}

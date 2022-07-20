@@ -8,6 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { RoomsService } from 'src/rooms/rooms.service';
 import { UsersService } from 'src/users';
 import { AppMessage } from './types';
 
@@ -27,7 +28,10 @@ interface RoomParams {
   },
 })
 export class SignallServerGateway implements OnGatewayInit {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private roomsService: RoomsService,
+  ) {}
   @WebSocketServer()
   private server: Server;
 
@@ -100,6 +104,27 @@ export class SignallServerGateway implements OnGatewayInit {
       participants: participants,
       me: { username, myPeerId },
     });
+  }
+
+  @SubscribeMessage('end-meeting')
+  async handleEndMeeting(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('roomId') roomId: string,
+    @MessageBody('userId') userId: string,
+  ) {
+    try {
+      const ownerRoomId = await this.roomsService.getRoomByOwnerId(+userId);
+      if (ownerRoomId.id === roomId) {
+        // disconnect all sockets in the room
+        this.server.in(roomId).socketsLeave(roomId);
+        // emit event to log users out of meeting
+        this.server.emit('group-disconnect');
+        // delete the room
+        this.roomsService.deleteRoom(roomId);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /* group chat */

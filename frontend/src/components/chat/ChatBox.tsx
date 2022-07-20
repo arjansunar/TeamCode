@@ -33,6 +33,7 @@ import {
   Message as AppMessage,
 } from "../../store/features/appMessages";
 import { Socket } from "socket.io-client";
+import { useCookies } from "react-cookie";
 
 type Props = {};
 
@@ -46,6 +47,8 @@ const ChatBox = (props: Props) => {
   const [uploadFile, setUploadFile] = useState<File>();
   // websocket connection
   const { ws }: { ws: Socket } = useContext(MeetingContext);
+
+  const [cookie] = useCookies(["meetingId"]);
 
   // meeting participants
   const participants = useSelector(getParticipants);
@@ -63,7 +66,7 @@ const ChatBox = (props: Props) => {
       };
       const messageDTO = {
         // * get from redux store
-        roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
+        roomId: cookie.meetingId,
         message,
       };
       // emit ws event
@@ -79,7 +82,7 @@ const ChatBox = (props: Props) => {
       };
       const messageDTO = {
         // * get from redux store
-        roomId: "98831f68-9147-483c-aa77-737b3cbebcc9",
+        roomId: cookie.meetingId,
         message,
       };
       // emit ws event
@@ -93,7 +96,7 @@ const ChatBox = (props: Props) => {
 
   // receive messages
   useEffect(() => {
-    ws.emit("join-group", { roomId: "98831f68-9147-483c-aa77-737b3cbebcc9" });
+    ws.emit("join-group", { roomId: cookie.meetingId });
     ws.on("group-message", (data: { message: AppMessage }) => {
       console.log("group-message", data);
       setAppMessages((prev) => [...prev, data.message]);

@@ -37,6 +37,14 @@ export class RoomsService {
     return newRoom;
   }
 
+  async deleteRoom(roomId: Room['id']) {
+    await this.prismaService.room.delete({
+      where: {
+        id: roomId,
+      },
+    });
+  }
+
   async getRoomByOwnerId(ownerId: number) {
     const room = await this.prismaService.room.findUnique({
       where: { ownerId },

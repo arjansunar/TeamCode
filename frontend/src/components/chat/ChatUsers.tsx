@@ -39,6 +39,7 @@ const ChatUsers = ({ selectable }: Props) => {
                   <UserContainer
                     key={el.id}
                     onClick={() => setSelectedParticipant(el)}
+                    selectable
                   >
                     <UserImage src={el.photo} />
                     <UserName>{el.username}</UserName>
@@ -107,8 +108,8 @@ const UserName = styled.h4`
   color: ${colors.theme["text-light-muted"]};
 `;
 
-const UserContainer = styled.div`
-  cursor: pointer;
+const UserContainer = styled.div<{ selectable?: boolean }>`
+  cursor: ${({ selectable }) => (selectable ? "pointer" : "default")};
   display: flex;
   gap: 2rem;
   width: 100%;
