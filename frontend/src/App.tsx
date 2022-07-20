@@ -11,7 +11,7 @@ import reset from "styled-reset";
 import colors from "./theme/colors.json";
 
 // react router
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 // pages
 import Login from "./pages/Login";
 import Chat from "./pages/Chat";
@@ -22,10 +22,8 @@ import Notification from "./pages/Notification";
 import Error from "./pages/Error";
 import Meeting from "./pages/Meeting";
 import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
-import { useDispatch, useSelector } from "react-redux";
-import { addParticipants } from "./store/features/participants";
-import { MeetingContext } from "./common/meetingDetails";
 import ShareCode from "./pages/ShareCode";
+import { RoleBasedProtectedRoute } from "./components/routing/RoleBasedProtectedRoute";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -73,14 +71,15 @@ function App() {
         <Route path="/login" element={<Login />} />
         {/* protected routes */}
         <Route element={<ProtectedRoutes />}>
-          <Route
+          {/* <Route
             path="/"
             element={
               <SideBarWrapper>
                 <Home />
               </SideBarWrapper>
             }
-          />
+          /> */}
+          <Route path="/" element={<Navigate to="/meeting" replace />} />
           <Route
             path="/chat"
             element={
@@ -97,14 +96,16 @@ function App() {
               </SideBarWrapper>
             }
           />
-          <Route
-            path="/notification"
-            element={
-              <SideBarWrapper>
-                <Notification />
-              </SideBarWrapper>
-            }
-          />
+          <Route element={<RoleBasedProtectedRoute />}>
+            <Route
+              path="/notification"
+              element={
+                <SideBarWrapper>
+                  <Notification />
+                </SideBarWrapper>
+              }
+            />
+          </Route>
           <Route
             path="/meeting"
             element={
@@ -122,7 +123,7 @@ function App() {
             }
           />
           <Route path="/share" element={<ShareCode />} />
-          <Route path="/error" element={<Error />} />
+          <Route path="*" element={<Error />} />
         </Route>
         {/* end protected routes */}
       </Routes>

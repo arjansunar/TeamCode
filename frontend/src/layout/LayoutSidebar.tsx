@@ -21,13 +21,17 @@ type Props = {
 export const LayoutSidebar = ({ children }: Props) => {
   const { user }: { user: UserData } = useContext(UserContext);
 
+  const isTeacher = user.role === "TEACHER";
+
   return (
     <Layout>
       <SidebarContainer>
         <IconsContainer>
           <LinkButton route="/chat" Icon={ChatIcon} />
           <LinkButton route="/editor" Icon={EditorIcon} />
-          <LinkButton route="/notification" Icon={NotificationIcon} />
+          {isTeacher ? (
+            <LinkButton route="/notification" Icon={NotificationIcon} />
+          ) : null}
           {user && user.photo && (
             <Link to="/meeting">
               <UserProfile src={user.photo} alt={user.username} />
