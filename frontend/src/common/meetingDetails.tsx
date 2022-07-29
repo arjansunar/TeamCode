@@ -1,5 +1,12 @@
 import Peer from "peerjs";
-import { createContext, FC, ReactNode, useEffect, useState } from "react";
+import {
+  createContext,
+  FC,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useCookies } from "react-cookie";
 import { useDispatch } from "react-redux";
 import SocketIoClient, { Socket } from "socket.io-client";
@@ -13,6 +20,7 @@ export const MeetingContext = createContext<any | null>(null);
 
 export const MeetingProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [me, setMe] = useState<Peer>();
+
   const [cookie, setCookie, removeCookie] = useCookies(["meetingId"]);
 
   const dispatch = useDispatch();

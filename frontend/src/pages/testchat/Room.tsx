@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { VideoPlayer } from "../../components/chat/VideoPlayer";
 import { RoomContext, RoomProvider } from "../../provider/RoomProvider";
 import { PeerState } from "../../store/reducer/peerReducer";
-import Peer, { DataConnection } from "peerjs";
+import Peer from "peerjs";
 // router params
 import { useParams } from "react-router-dom";
 import { UserContext, UserData } from "../../provider/UserProvider";
@@ -14,6 +14,8 @@ import { useCookies } from "react-cookie";
 // theme
 import colors from "../../theme/colors.json";
 import ChatUsers from "../../components/chat/ChatUsers";
+import { axiosTeamCode } from "../../api/hooks";
+import { ApiRoom } from "../../types";
 
 type Props = {
   roomId: string;
@@ -32,7 +34,7 @@ const JoinMeeting = () => {
   const { user }: { user: UserData } = useContext(UserContext);
   const participants = useSelector(getParticipants);
 
-  const [cookie, setCookie] = useCookies(["meetingId"]);
+  const [cookie, setCookie] = useCookies(["meetingId", "meetingOwner"]);
 
   const { me, ws } = useContext(MeetingContext);
 
@@ -69,7 +71,31 @@ const JoinMeeting = () => {
     });
   };
 
+  const { token } = useContext(UserContext);
+
   useEffect(joinDefaultRoom, [me, ws]);
+
+  useEffect(() => {
+    if (!roomId) return;
+    (async () => {
+      try {
+        if (!token) return;
+        axiosTeamCode.defaults.headers.common = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        const { data: roomDetails }: { data: ApiRoom } =
+          await axiosTeamCode.get(`/rooms/room-details/${roomId}`);
+
+        setCookie("meetingOwner", roomDetails.ownerId, {
+          path: "/",
+          maxAge: 60 * 60 * 24,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
 
   return (
     <JoinContainer className="">

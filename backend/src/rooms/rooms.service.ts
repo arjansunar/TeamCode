@@ -52,8 +52,10 @@ export class RoomsService {
     return room;
   }
 
-  getRoom(roomId: string): Room {
-    const room = this.rooms.find((el) => el.id === roomId);
+  async getRoom(roomId: string): Promise<Room> {
+    const room = await this.prismaService.room.findUnique({
+      where: { id: roomId },
+    });
     if (!room) throw new NotFoundException('Room id not found');
     return room;
   }

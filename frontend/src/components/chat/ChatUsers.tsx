@@ -27,7 +27,6 @@ const ChatUsers = ({ selectable }: Props) => {
     if (typeof user !== "object") return;
     reduxDispatch(setSelected(user));
   };
-  console.log({ participants });
   return (
     <Container>
       <UsersContainer hasMargin={!!participants.length}>

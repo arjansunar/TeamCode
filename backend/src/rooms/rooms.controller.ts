@@ -42,8 +42,9 @@ export class RoomsController {
   }
 
   @Get('/room-details/:roomId')
-  getRoomDetails(@Param('roomId') roomId: string): Room {
-    return this.roomsService.getRoom(roomId);
+  async getRoomDetails(@Param('roomId') roomId: string): Promise<Room> {
+    console.log('hya aayo', roomId);
+    return await this.roomsService.getRoom(roomId);
   }
 
   @Post('/add-member/:roomId')

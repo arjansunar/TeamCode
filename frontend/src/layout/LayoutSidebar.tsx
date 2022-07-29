@@ -13,6 +13,7 @@ import { IoMdNotifications as NotificationIcon } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 
 import { UserContext, UserData } from "../provider/UserProvider";
+import { NotificationContext } from "../provider/NotificationsProvider";
 
 type Props = {
   children?: ReactNode;
@@ -20,6 +21,7 @@ type Props = {
 
 export const LayoutSidebar = ({ children }: Props) => {
   const { user }: { user: UserData } = useContext(UserContext);
+  const { notifications } = useContext(NotificationContext);
 
   const isTeacher = user.role === "TEACHER";
 
@@ -30,7 +32,11 @@ export const LayoutSidebar = ({ children }: Props) => {
           <LinkButton route="/chat" Icon={ChatIcon} />
           <LinkButton route="/editor" Icon={EditorIcon} />
           {isTeacher ? (
-            <LinkButton route="/notification" Icon={NotificationIcon} />
+            <NotifyNumber size={String(notifications.length).length}>
+              <LinkButton route="/notification" Icon={NotificationIcon} />
+
+              {notifications.length > 0 && <span>{notifications.length}</span>}
+            </NotifyNumber>
           ) : null}
           {user && user.photo && (
             <Link to="/meeting">
@@ -55,6 +61,30 @@ const LinkButton = ({ Icon, route }: { Icon: IconType; route: string }) => {
     </IconWrapper>
   );
 };
+
+const NotifyNumber = styled.div<{ size: number }>`
+  position: relative;
+  margin-top: ${({ size }) => size * 0.06 + "rem"};
+
+  span {
+    box-sizing: border-box;
+    --padding: 0.2rem;
+    --size: ${({ size }) => size}ch;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: ${colors.theme["text-light"]};
+    font-size: 0.7rem;
+    height: calc(1.5ch + var(--padding) + var(--padding));
+    padding: var(--padding);
+    width: calc(var(--size) + var(--padding) + var(--padding));
+    top: -${({ size }) => size * 0.3 + "rem"};
+    right: -1.5ch;
+    background-color: ${colors.theme.message["bg-light-blue"]};
+    border-radius: 20%;
+  }
+`;
 
 const SidebarContainer = styled.div`
   --padding-top: 2rem;

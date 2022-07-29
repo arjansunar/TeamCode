@@ -27,6 +27,9 @@ import { AiFillCopy as CopyIcon } from "react-icons/ai";
 import { FaClipboardCheck as CopiedIcon } from "react-icons/fa";
 
 import { v4 as uuid } from "uuid";
+import { useCookies } from "react-cookie";
+import { Socket } from "socket.io-client";
+import { MeetingContext } from "../common/meetingDetails";
 
 interface SubmissionSchema {
   language_id: number;
@@ -96,6 +99,8 @@ export enum ReadOnly {
 
 const Editor = (props: Props) => {
   const { user }: { user: UserData } = useContext(UserContext);
+
+  const { ws }: { ws: Socket } = useContext(MeetingContext);
   const [code, setCode] = useState<string>("");
   const selectedUser = useSelector(getSelectedParticipant);
   const [output, setOutput] = useState<ExecutionResults>(
@@ -108,6 +113,10 @@ const Editor = (props: Props) => {
   const [shareLink, setShareLink] = useState<string>("");
 
   const [codeExecutionLoading, setCodeExecutionLoading] = useState(false);
+
+  const [cookie] = useCookies(["meetingOwner", "meetingId"]);
+
+  const isOwner = cookie.meetingOwner == user.id;
 
   const handleRunButton = async () => {
     if (code.length < 1) {
@@ -144,6 +153,29 @@ const Editor = (props: Props) => {
     setIsReadOnly(true);
     openModal();
     // alert("share link: " + shareLink);
+  };
+
+  const handleNotifyTeacher = () => {
+    if (code.length < 1) {
+      alert("No code written!!");
+      return;
+    }
+    const message = prompt("Message for Teacher: ");
+    alert("Notify teacher\n" + getShareToTeacherLink() + "\n" + message);
+    ws.emit("notify-teacher", {
+      roomId: cookie.meetingId,
+      message,
+      link: getShareToTeacherLink(),
+      userId: user.id,
+    });
+  };
+
+  const getShareToTeacherLink = () => {
+    return `http://localhost:3000/share?from=${user.id}&code=${btoa(
+      code
+    )}&shareTo=${cookie.meetingOwner}&readOnly=${
+      ReadOnly.False
+    }&roomId=${uuid()}`;
   };
 
   const [modalIsOpen, setIsModalOpen] = useState(false);
@@ -192,6 +224,11 @@ const Editor = (props: Props) => {
         )}
         <Button onClick={handleShareButton}>Share</Button>
         <Button onClick={handleShareReadOnlyButton}>Read Only</Button>
+        {!isOwner ? (
+          <Button bg={colors.theme["danger-400"]} onClick={handleNotifyTeacher}>
+            Notify
+          </Button>
+        ) : null}
       </SettingsWrapper>
       <AceEditor code={code} setCode={setCode} />
       <OutputScreen output={output} />
@@ -246,8 +283,8 @@ const LoaderWrapper = styled.div`
   align-items: center;
   border-radius: 0.2rem;
 `;
-export const Button = styled.button`
-  background-color: #4a99de;
+export const Button = styled.button<{ bg?: string }>`
+  background-color: ${({ bg }) => (bg ? bg : "#4a99de")};
   border: none;
   font-size: 16px;
   padding: 5px 18px;

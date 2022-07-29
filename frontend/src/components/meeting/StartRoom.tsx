@@ -42,6 +42,7 @@ export const StartRoom = (props: Props) => {
         };
 
         const { data } = await axiosTeamCode.get("/rooms/my-room");
+
         const myRoomId = data?.id;
 
         if (!myRoomId) return;

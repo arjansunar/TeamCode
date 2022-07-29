@@ -68,7 +68,6 @@ export class SignallServerGateway implements OnGatewayInit {
     this.server.to(roomId).emit('user-joined', { peerId });
 
     client.on('disconnect', () => {
-      // console.log('user left the room');
       // remove peer on disconnect
       this.rooms[roomId] = this.rooms[roomId].filter(
         (el) => el !== peerId && el !== null,
@@ -83,7 +82,6 @@ export class SignallServerGateway implements OnGatewayInit {
     @MessageBody('peerId') peerId: string,
     @MessageBody('userId') userId: number,
   ) {
-    console.log('here');
     const user = await this.usersService.updateUserPeerId({
       id: userId,
       peerId,
@@ -91,19 +89,28 @@ export class SignallServerGateway implements OnGatewayInit {
 
     const { username, peerId: myPeerId } = user;
 
-    console.log({ username, myPeerId, roomId });
-
     const participants = await Promise.all(
       this.rooms[roomId].map(
         async (id) => await this.usersService.findUserWithPeerId(id),
       ),
     );
-    console.log({ participants });
     this.server.to(roomId).emit('get-users', {
       roomId,
       participants: participants,
       me: { username, myPeerId },
     });
+  }
+
+  @SubscribeMessage('notify-teacher')
+  handleNotifyTeacher(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('message') message: string,
+    @MessageBody('link') link: string,
+    @MessageBody('roomId') roomId: string,
+    @MessageBody('userId') userId: number,
+  ) {
+    console.log('notify teacher', message, link, roomId);
+    client.to(roomId).emit('notification-teach', { message, link, userId });
   }
 
   @SubscribeMessage('end-meeting')
@@ -133,7 +140,6 @@ export class SignallServerGateway implements OnGatewayInit {
     @ConnectedSocket() client: Socket,
     @MessageBody('roomId') roomId: string,
   ) {
-    console.log('client joins');
     client.join(roomId);
     const participants = await Promise.all(
       this.rooms[roomId].map(
@@ -153,7 +159,6 @@ export class SignallServerGateway implements OnGatewayInit {
     @MessageBody('roomId') roomId: string,
     @MessageBody('message') message: AppMessage,
   ) {
-    console.log('message sent to group', roomId, message);
     const participants = await Promise.all(
       this.rooms[roomId].map(
         async (id) => await this.usersService.findUserWithPeerId(id),

@@ -13,17 +13,20 @@ import { UserProvider } from "./provider/UserProvider";
 import { store } from "./store/store";
 import { Provider as ReduxProvider } from "react-redux";
 import { MeetingProvider } from "./common/meetingDetails";
+import { NotificationProvider } from "./provider/NotificationsProvider";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <>
     <BrowserRouter>
       <CookiesProvider>
         <ReduxProvider store={store}>
-          <MeetingProvider>
-            <UserProvider>
-              <App />
-            </UserProvider>
-          </MeetingProvider>
+          <UserProvider>
+            <MeetingProvider>
+              <NotificationProvider>
+                <App />
+              </NotificationProvider>
+            </MeetingProvider>
+          </UserProvider>
         </ReduxProvider>
       </CookiesProvider>
     </BrowserRouter>
