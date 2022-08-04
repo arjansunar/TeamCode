@@ -15,28 +15,36 @@ import { MdDelete as DeleteIcon } from "react-icons/md";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { getParticipants } from "../store/features/participants";
 import { useSelector } from "react-redux";
+import { UserImage } from "../components/chat/ChatUsers";
 
 type Props = {};
 
 const Notification = (props: Props) => {
-  const { notifications } = useContext(NotificationContext);
+  const { notifications, setNotifications } = useContext(NotificationContext);
   const participants = useSelector(getParticipants);
+
   return (
     <Container>
       <TitleText>Notifications</TitleText>
-      <NotificationListContainer>
-        {notifications.map((notificationItem) => (
-          <NotificationItem
-            key={notificationItem.id}
-            item={notificationItem}
-            photo={
-              participants.find(
-                (participant) => participant.id === notificationItem.userId
-              )?.photo
-            }
-          />
-        ))}
-      </NotificationListContainer>
+      {notifications.length > 0 ? (
+        <NotificationListContainer>
+          {notifications.map((notificationItem) => (
+            <NotificationItem
+              key={notificationItem.id}
+              item={notificationItem}
+              photo={
+                participants.find(
+                  (participant) => participant.id === notificationItem.userId
+                )?.photo
+              }
+            />
+          ))}
+        </NotificationListContainer>
+      ) : (
+        <TextContainter>
+          <DisplayRoomId>No notifications</DisplayRoomId>
+        </TextContainter>
+      )}
     </Container>
   );
 };
@@ -45,15 +53,26 @@ export default Notification;
 
 interface NotificationItemProps {
   item: NotificationType;
-  photo: string;
+  photo?: string;
 }
 const NotificationItem = ({ item, photo }: NotificationItemProps) => {
   const [isCopied, setIsCopied] = useState(false);
 
+  const { notifications, setNotifications } = useContext(NotificationContext);
+
+  const handleDelete = ({ id }: { id: string }) => {
+    if (!setNotifications) return;
+    const newNotifications = notifications.filter((el) => el.id !== id);
+    setNotifications(newNotifications);
+  };
+
   return (
     <NotificationItemContainer>
-      <img src={photo} alt="" />
       <ListBgContainer>
+        <FlexContainer gap="2rem">
+          <UserImage src={photo} alt="" />
+          <SubTitleText>{item.message}</SubTitleText>
+        </FlexContainer>
         <CopyToClipboard
           text={item.link}
           onCopy={() => {
@@ -64,10 +83,10 @@ const NotificationItem = ({ item, photo }: NotificationItemProps) => {
           <FlexContainer>
             <LinkText>
               {isCopied ? <CopiedIcon /> : <CopyIcon />}
-              {item.link.substring(0, 80)}...
+              {item.link.substring(0, 60)}...
             </LinkText>
             <NotificationBtnContainer>
-              <Btn danger>
+              <Btn danger onClick={() => handleDelete({ id: item.id })}>
                 <DeleteIcon />
               </Btn>
             </NotificationBtnContainer>
@@ -92,13 +111,16 @@ const Container = styled.div`
 const LinkText = styled(DisplayRoomId)`
   text-overflow: ellipsis;
   min-height: 4ch;
-  min-width: 80ch;
 `;
 
-const FlexContainer = styled.div`
+interface FlexContainerProps {
+  gap?: string;
+}
+const FlexContainer = styled.div<FlexContainerProps>`
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: ${({ gap }) => gap || "0rem"};
+  /* justify-content: center; */
 `;
 
 const TitleText = styled.h2`
@@ -109,6 +131,11 @@ const TitleText = styled.h2`
   text-align: center;
   font-size: x-large;
   margin-top: 2rem;
+`;
+
+const SubTitleText = styled(TitleText)`
+  font-size: large;
+  text-align: unset;
 `;
 
 const NotificationListContainer = styled.div`
@@ -130,4 +157,9 @@ const NotificationBtnContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const TextContainter = styled.div`
+  max-width: 50%;
+  margin: 0 auto;
 `;

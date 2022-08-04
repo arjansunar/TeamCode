@@ -94,7 +94,7 @@ const UsersContainer = styled.div<UserContainerProps>`
   }
 `;
 
-const UserImage = styled.img`
+export const UserImage = styled.img`
   height: 3rem;
   width: 3rem;
   border-radius: 0.5rem 0 0 0.5rem;

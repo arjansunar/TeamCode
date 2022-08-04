@@ -19,9 +19,13 @@ export interface Notification {
   userId: number;
 }
 
-const NotificationContext = createContext<{
+interface NotificationContextProps {
   notifications: Notification[];
-}>({ notifications: [] });
+  setNotifications?: React.Dispatch<React.SetStateAction<Notification[]>>;
+}
+const NotificationContext = createContext<NotificationContextProps>({
+  notifications: [],
+});
 
 const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const { user }: { user: UserData } = useContext(UserContext);
@@ -53,7 +57,7 @@ const NotificationProvider = ({ children }: { children: ReactNode }) => {
   console.log({ notifications });
 
   return (
-    <NotificationContext.Provider value={{ notifications }}>
+    <NotificationContext.Provider value={{ notifications, setNotifications }}>
       {children}
     </NotificationContext.Provider>
   );
