@@ -4,6 +4,7 @@ import colors from "../../theme/colors.json";
 
 import { AiFillCopy as CopyIcon } from "react-icons/ai";
 import { FaClipboardCheck as CopiedIcon } from "react-icons/fa";
+
 import { UserContext, UserData } from "../../provider/UserProvider";
 import { axiosTeamCode } from "../../api/hooks";
 import CopyToClipboard from "react-copy-to-clipboard";
@@ -166,7 +167,7 @@ export const Btn = styled.button<{ danger?: boolean }>`
   }
 `;
 
-const DisplayRoomId = styled.div`
+export const DisplayRoomId = styled.div`
   background-color: ${colors.theme["dark-800"]};
   padding: 1rem 1.3rem;
   display: flex;
