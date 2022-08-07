@@ -62,7 +62,7 @@ const JoinMeeting = () => {
     if (!roomId) return;
     // @ts-ignore
     ws.emit("join-room", { roomId: roomId, peerId: me._id });
-    setCookie("meetingId", roomId, { path: "/", maxAge: 60 * 60 * 24 });
+    setCookie("meetingId", roomId);
     ws.emit("update-user-peer-id", {
       // @ts-ignore
       peerId: me._id,

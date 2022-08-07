@@ -50,6 +50,7 @@ export const MeetingProvider: FC<{ children: ReactNode }> = ({ children }) => {
       // setCookie("meetingId", "");
     });
     ws.on("group-disconnect", () => {
+      console.log("group-disconnect");
       setCookie("meetingId", "");
       removeCookie("meetingId");
     });

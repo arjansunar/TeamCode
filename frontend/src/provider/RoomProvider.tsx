@@ -91,7 +91,7 @@ export const RoomProvider: FC<Props> = ({ children }) => {
           setStream(stream);
         });
     } catch (error) {
-      console.error(error);
+      console.log("video not started");
     }
   }, []);
 

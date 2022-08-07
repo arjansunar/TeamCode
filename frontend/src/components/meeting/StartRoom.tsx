@@ -21,10 +21,7 @@ export const StartRoom = (props: Props) => {
   const [roomId, setRoomId] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
-  const [cookie, setCookie, removeTokenCookie] = useCookies([
-    "token",
-    "meetingId",
-  ]);
+  const [cookie, setCookie, removeCookie] = useCookies(["token", "meetingId"]);
 
   const { ws, me }: { ws: Socket; me: Peer } = useContext(MeetingContext);
   const { user }: { user: UserData } = useContext(UserContext);
@@ -64,7 +61,7 @@ export const StartRoom = (props: Props) => {
 
   const handleLogOut = () => {
     setCookie("token", "");
-    removeTokenCookie("token");
+    removeCookie("token");
     handleCloseRoom();
     me.destroy();
     me.disconnect();

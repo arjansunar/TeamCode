@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 
 import { IoMdMail as MailIcon } from "react-icons/io";
-import { JoinRoom, StartRoom } from "../components/meeting";
+import { JoinRoom, StartRoom, VideoCallLink } from "../components/meeting";
 
 type Props = {};
 
@@ -44,6 +44,8 @@ const Meeting = (props: Props) => {
       )}
 
       {isTeacher ? <StartRoom /> : <JoinRoom />}
+
+      <VideoCallLink />
     </MeetingWrapper>
   );
 };
