@@ -7,16 +7,14 @@ import {
   useReducer,
   useState,
 } from "react";
-import SocketIoClient from "socket.io-client";
-import { v4 as uuidV4 } from "uuid";
+import { Socket } from "socket.io-client";
 import {
   addPeerStreamAction,
   removePeerStreamAction,
 } from "../store/actions/peerActions";
-import Peer from "peerjs";
+import Peer, { MediaConnection } from "peerjs";
 import { peersReducer } from "../store/reducer/peerReducer";
-import { useDispatch, useSelector } from "react-redux";
-import { addParticipants } from "../store/features/participants";
+import { useDispatch } from "react-redux";
 import { MeetingContext } from "../common/meetingDetails";
 
 // add bearer token
@@ -29,6 +27,8 @@ const socketOptions = {
     },
   },
 };
+
+interface RoomContextProps {}
 export const RoomContext = createContext<null | any>(null);
 
 interface Props {
@@ -37,82 +37,66 @@ interface Props {
 export const RoomProvider: FC<Props> = ({ children }) => {
   // reference to the user peer "me"
 
-  const { me, ws } = useContext(MeetingContext);
+  const { me, ws }: { me: Peer; ws: Socket } = useContext(MeetingContext);
   // reducers for working with peer
   const [peers, dispatch] = useReducer(peersReducer, {});
 
   // media stream
-  const [audioStream, setAudioStream] = useState<MediaStream>();
+  const [stream, setStream] = useState<MediaStream>();
 
-  // meeting participants
-  const [participants, setParticipants] = useState<null | any>();
+  // call users on joining room
+  const callUsers = ({ peerId }: { peerId: string }) => {
+    if (!stream) return;
+    const call = me.call(peerId, stream);
+    if (!call) return;
+    call.on("stream", (peerStream: MediaStream) =>
+      dispatch(addPeerStreamAction(peerId, peerStream))
+    );
+  };
+  // answer to upcoming call request
+  const answer = (call: MediaConnection) => {
+    if (!stream) return;
+    call.answer(stream);
+    call.on("stream", (peerStream) =>
+      dispatch(addPeerStreamAction(call.peer, peerStream))
+    );
+  };
 
-  // redux wrapper
-  const reduxDispatch = useDispatch();
+  const handleDisconnect = ({ peerId }: { peerId: string }) => {
+    // console.log("user disconnected ", peerId, peers);
+    dispatch(removePeerStreamAction(peerId));
+  };
 
-  // useEffect(() => {
-  //   const userId = uuidV4();
-  //   const userPeer = new Peer(
-  //     userId
-  //     //   {
-  //     //   host: "localhost",
-  //     //   port: 9000,
-  //     //   path: "/teamCode",
-  //     // }
-  //   );
+  useEffect(() => {
+    if (!me || !stream) return;
+    // initiation
+    ws.on("user-joined", callUsers);
 
-  //   setMe(userPeer);
+    // answer
+    me.on("call", answer);
 
-  //   // getting user media
-  //   // try {
-  //   //   navigator.mediaDevices
-  //   //     .getUserMedia({ audio: true, video: true })
-  //   //     .then((stream) => setAudioStream(stream));
-  //   // } catch (err) {
-  //   //   console.error(err);
-  //   // }
-  // }, []);
+    ws.on("user-disconnect", handleDisconnect);
 
-  // useEffect(() => {
-  //   const getUsers = ({
-  //     participants,
-  //     me,
-  //   }: {
-  //     participants: { participants: [] };
-  //     me: any;
-  //   }) => {
-  //     setParticipants({ participants, me });
-  //     console.log({ participants });
-  //   };
-  //   ws.on("get-users", getUsers);
-  // }, [ws]);
+    return () => {
+      ws.off("user-joined");
+      ws.off("user-disconnect");
+    };
+  }, [me, stream]);
 
-  // useEffect(() => {
-  //   if (!me || !audioStream) return;
-  //   // initiation
-  //   ws.on("user-joined", ({ peerId }) => {
-  //     const call = me.call(peerId, audioStream);
-  //     if (!call) return;
-  //     call.on("stream", (peerStream) =>
-  //       dispatch(addPeerStreamAction(peerId, peerStream))
-  //     );
-  //   });
-  //   // answer
-  //   me.on("call", (call) => {
-  //     call.answer(audioStream);
-  //     call.on("stream", (peerStream) =>
-  //       dispatch(addPeerStreamAction(call.peer, peerStream))
-  //     );
-  //   });
-
-  //   ws.on("user-disconnect", ({ peerId }) => {
-  //     // console.log("user disconnected ", peerId, peers);
-  //     dispatch(removePeerStreamAction(peerId));
-  //   });
-  // }, [me, audioStream]);
+  useEffect(() => {
+    try {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
+        .then((stream) => {
+          setStream(stream);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   return (
-    <RoomContext.Provider value={{ ws, me, participants }}>
+    <RoomContext.Provider value={{ peers, stream }}>
       {children}
     </RoomContext.Provider>
   );

@@ -124,33 +124,4 @@ const Container = styled.div`
   /* justify-content: center; */
 `;
 
-const VideoWrapper = () => {
-  const {
-    peers,
-    me,
-    audioStream,
-  }: { peers: PeerState; me: Peer; audioStream: MediaStream } =
-    useContext(RoomContext);
-  peers;
-  if (!peers || !me) return <div>no users</div>;
-
-  const otherUsers = Object.keys(peers).filter((ids) => ids !== me.id);
-  console.table(otherUsers);
-  console.log(me.id);
-  return (
-    <div>
-      <VideoPlayer stream={audioStream} />
-      {peers
-        ? otherUsers.map((peerId, index) => {
-            return <VideoPlayer stream={peers[peerId].stream} key={index} />;
-          })
-        : null}
-    </div>
-  );
-};
-
-const DebugText = styled.div`
-  color: black;
-`;
-
 export default Room;

@@ -12,16 +12,6 @@ import { RoomsService } from 'src/rooms/rooms.service';
 import { UsersService } from 'src/users';
 import { AppMessage } from './types';
 
-interface Payload {
-  target: string;
-  candidate: string;
-}
-
-interface RoomParams {
-  roomId: string;
-  peerId: string;
-}
-
 @WebSocketGateway(5001, {
   cors: {
     origin: '*',

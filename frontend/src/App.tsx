@@ -25,6 +25,7 @@ import { ProtectedRoutes } from "./components/routing/ProtectedRoutes";
 import ShareCode from "./pages/ShareCode";
 import { RoleBasedProtectedRoute } from "./components/routing/RoleBasedProtectedRoute";
 import { MeetingIdNeeded } from "./components/routing/MeetingIdProtectedRoute";
+import VideoChat from "./pages/Video";
 
 const GlobalStyleWithReset = createGlobalStyle`
 ${reset}
@@ -72,14 +73,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         {/* protected routes */}
         <Route element={<ProtectedRoutes />}>
-          {/* <Route
-            path="/"
-            element={
-              <SideBarWrapper>
-                <Home />
-              </SideBarWrapper>
-            }
-          /> */}
           <Route path="/" element={<Navigate to="/meeting" replace />} />
           <Route element={<MeetingIdNeeded />}>
             <Route
@@ -126,6 +119,7 @@ function App() {
             }
           />
           <Route path="/share" element={<ShareCode />} />
+          <Route path="/video/:meetingId" element={<VideoChat />} />
           <Route path="*" element={<Error />} />
         </Route>
         {/* end protected routes */}
