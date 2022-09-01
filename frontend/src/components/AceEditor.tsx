@@ -11,16 +11,10 @@ type Props = {
 };
 
 const AceEditor = ({ code, setCode }: Props) => {
-  const onChange = (newVal, e) => {
+  const onChange = (newVal: string) => {
     setCode(newVal);
   };
-  const onLoad = (editor) => {
-    // editor.setOptions({
-    //   enableSnippets: true,
-    //   enableBasicAutocompletion: true,
-    //   enableLiveAutocompletion: true,
-    // });
-  };
+
   return (
     <ReactAce
       name="ACE_EDITOR_REACT"
@@ -30,7 +24,6 @@ const AceEditor = ({ code, setCode }: Props) => {
       style={{ height: "100%", width: "100%" }}
       readOnly={false}
       fontSize={18}
-      onLoad={onLoad}
       setOptions={{
         enableBasicAutocompletion: true,
         enableLiveAutocompletion: true,
