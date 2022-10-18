@@ -1,6 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { env } from 'process';
 import { AppModule } from './app.module';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 
@@ -47,6 +48,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  await app.listen(5000);
+  await app.listen(process.env.port || 5000);
 }
 bootstrap();
