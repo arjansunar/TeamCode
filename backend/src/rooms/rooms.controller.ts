@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UserLoggedGuard } from 'src/auth/guard/user-loggin.guard';
 import { Role } from 'src/users/decorator/role.decorator';
 import { Role as UserRole } from '@prisma/client';
@@ -16,13 +23,28 @@ export class RoomsController {
   @Post('/generate')
   @Role(UserRole.TEACHER)
   @UseGuards(RoleGuard)
-  createRoom(@GetUser('id') ownerId) {
-    return this.roomsService.createNewRoom(ownerId);
+  async createRoom(@GetUser('id') ownerId) {
+    return await this.roomsService.createNewRoom(ownerId);
+  }
+
+  @Get('/my-room')
+  @Role(UserRole.TEACHER)
+  @UseGuards(RoleGuard)
+  async getOwnerRoom(@GetUser('id') ownerId: number) {
+    return await this.roomsService.getRoomByOwnerId(ownerId);
+  }
+
+  @Delete('/end-meeting')
+  @Role(UserRole.TEACHER)
+  @UseGuards(RoleGuard)
+  async endMeeting(roomId: Room['id']) {
+    return await this.roomsService.deleteRoom(roomId);
   }
 
   @Get('/room-details/:roomId')
-  getRoomDetails(@Param('roomId') roomId: string): Room {
-    return this.roomsService.getRoom(roomId);
+  async getRoomDetails(@Param('roomId') roomId: string): Promise<Room> {
+    console.log('hya aayo', roomId);
+    return await this.roomsService.getRoom(roomId);
   }
 
   @Post('/add-member/:roomId')

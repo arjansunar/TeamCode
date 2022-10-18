@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { Role as UserRole } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator/get-user.decorator';
 import { UserLoggedGuard } from 'src/auth/guard/user-loggin.guard';
@@ -12,6 +12,13 @@ import { UsersService } from './users.service';
 @UseGuards(UserLoggedGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
+
+  @Get('/is-logged-in')
+  async isLoggedIn(@GetUser('id') id: number) {
+    const user = await this.usersService.findUserWithId(id);
+
+    return { isLoggedIn: !!user && !!user.hashedRt };
+  }
 
   @Get('/me')
   async getMe(@GetUser() user) {

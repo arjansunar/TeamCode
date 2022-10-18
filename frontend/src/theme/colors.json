@@ -2,6 +2,7 @@
   "bg-dark": "#262626",
   "bg-light": "#fefefe",
   "theme": {
+    "danger-400": "hsl(0, 54%, 52%)",
     "dark-300": "#272a2d",
     "dark-400": "#1c1e1f",
     "dark-500": "#181a1c",
@@ -9,6 +10,7 @@
     "text-light": "#f6fbfe",
     "text-light-muted": "#c0c2c3",
     "text-dark": "#272a2d",
+    "bg-blue": "rgb(41, 153, 253)",
     "message": {
       "bg-light-blue": "#2999fd",
       "bg-gray": "#26292c"

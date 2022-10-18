@@ -9,7 +9,19 @@ axios.defaults.headers.common = {
 };
 export const axiosJudge0 = axios;
 
-const useAxios = ({ url, method, body = null, headers = null }) => {
+interface useAxiosParams {
+  url: string;
+  method: "get" | "post" | "put" | "delete";
+  body?: any;
+  headers?: any;
+}
+
+const useAxios = ({
+  url = "",
+  method = "get",
+  body = null,
+  headers = null,
+}: useAxiosParams) => {
   const [response, setResponse] = useState(null);
   const [error, setError] = useState("");
   const [loading, setloading] = useState(true);
