@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { SignallServerModule } from './signall-server/signall-server.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { ShareCodeServerGateway } from './share-code/share-code-server.gateway';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ShareCodeServerGateway } from './share-code/share-code-server.gateway';
     SignallServerModule,
     RoomsModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
